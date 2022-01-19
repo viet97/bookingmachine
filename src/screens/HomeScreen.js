@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { FlatList, StyleSheet, Pressable, View } from 'react-native'
 import FastImage from 'react-native-fast-image'
+import LinearGradient from 'react-native-linear-gradient'
+import Swiper from 'react-native-swiper'
 import Text from '../components/Text'
 import { Colors } from '../themes/Colors'
 import { pixel, widthDevice } from '../utils/DeviceUtil'
@@ -31,6 +33,16 @@ const data = [
         name: "Chụp\nX-Quang",
         backgroundUrl: "https://i.stack.imgur.com/Of2w5.jpg"
     },
+    {
+        id: 5,
+        name: "Chụp\nX-Quang",
+        backgroundUrl: "https://i.stack.imgur.com/Of2w5.jpg"
+    },
+    {
+        id: 5,
+        name: "Chụp\nX-Quang",
+        backgroundUrl: "https://i.stack.imgur.com/Of2w5.jpg"
+    },
 ]
 
 export default class HomeScreen extends Component {
@@ -40,6 +52,10 @@ export default class HomeScreen extends Component {
 
         }
         this.serviceItemWidth = (widthDevice - pixel(180)) / 2
+        this.serviceItemHeight = pixel(280)
+        this.maxServiceRow = 3
+        this.serviceItemMargin = pixel(48)
+        this.maxServiceListHeight = this.serviceItemHeight * this.maxServiceRow + this.serviceItemMargin * (this.maxServiceRow - 1)
     }
 
     renderHeader = () => {
@@ -47,6 +63,7 @@ export default class HomeScreen extends Component {
             style={styles.headerContainer}>
             <FastImage
                 resizeMode={'contain'}
+                source={{ uri: "https://i.stack.imgur.com/Of2w5.jpg" }}
                 style={styles.logo} />
             <View
                 style={styles.headerInfo}>
@@ -66,8 +83,8 @@ export default class HomeScreen extends Component {
         const isFirstColumn = index % 2 === 0
         const isFirstRow = index <= 1
         const dynamicStyle = {
-            marginTop: isFirstRow ? 0 : pixel(48),
-            marginRight: isFirstColumn ? pixel(48) : 0,
+            marginTop: isFirstRow ? 0 : this.serviceItemMargin,
+            marginRight: isFirstColumn ? this.serviceItemMargin : 0,
             width: this.serviceItemWidth,
         }
         return (<Pressable
@@ -92,31 +109,59 @@ export default class HomeScreen extends Component {
                 data={data}
                 keyExtractor={(item, index) => `${item.id}${index}`}
                 renderItem={this.renderItem}
-                style={styles.serviceList} />
+                showsVerticalScrollIndicator={false}
+                style={[styles.serviceList, {
+                    maxHeight: this.maxServiceListHeight
+                }]} />
         </View>
 
     }
 
-    render() {
+    renderSwiper = () => {
         return (
             <View
+                style={styles.swiperContainer}>
+                <Swiper
+                    showsPagination={false}
+                    autoplay
+                    loop>
+                    {data.map(it => <FastImage
+                        resizeMode={'cover'}
+                        source={{ uri: it.backgroundUrl }}
+                        style={{ flex: 1 }} />)}
+                </Swiper>
+            </View>)
+    }
+
+    render() {
+        return (
+            <LinearGradient
+                start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+                colors={[Colors.anti_flash, Colors.white]}
                 style={styles.container}>
-                {this.renderHeader()}
-                {this.renderServices()}
-            </View>
+                <View
+                    style={styles.container}>
+                    {this.renderHeader()}
+                    {this.renderServices()}
+                    {this.renderSwiper()}
+                </View>
+            </LinearGradient>
         )
     }
 }
 
 
 const styles = StyleSheet.create({
+    swiperContainer: {
+        marginTop: pixel(88),
+        flex: 1
+    },
     container: {
         flex: 1,
-        backgroundColor: Colors.anti_flash
     },
     serviceList: {
         marginTop: pixel(90),
-        marginHorizontal: pixel(66)
+        marginHorizontal: pixel(66),
     },
     serviceName: {
         color: Colors.white,
@@ -163,7 +208,6 @@ const styles = StyleSheet.create({
     logo: {
         width: pixel(158),
         height: pixel(158),
-        backgroundColor: "red"
     },
     headerContainer: {
         flexDirection: "row",
