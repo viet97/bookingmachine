@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
-import { FlatList, StyleSheet, Pressable, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
-import Text from '../components/Text'
-import { Colors } from '../themes/Colors'
-import { pixel, widthDevice } from '../utils/DeviceUtil'
+import Text from '../../components/Text'
+import { Colors } from '../../themes/Colors'
+import { pixel, widthDevice } from '../../utils/DeviceUtil'
+import ServiceItem from './ServiceItem'
 
 const data = [
     {
@@ -58,6 +59,13 @@ export default class HomeScreen extends Component {
         this.maxServiceListHeight = this.serviceItemHeight * this.maxServiceRow + this.serviceItemMargin * (this.maxServiceRow - 1)
     }
 
+    fetchData = async () => {
+    }
+
+    componentDidMount() {
+        this.fetchData()
+    }
+
     renderHeader = () => {
         return <View
             style={styles.headerContainer}>
@@ -80,26 +88,13 @@ export default class HomeScreen extends Component {
     }
 
     renderItem = ({ item, index }) => {
-        const isFirstColumn = index % 2 === 0
-        const isFirstRow = index <= 1
-        const dynamicStyle = {
-            marginTop: isFirstRow ? 0 : this.serviceItemMargin,
-            marginRight: isFirstColumn ? this.serviceItemMargin : 0,
-            width: this.serviceItemWidth,
-        }
-        return (<Pressable
-            style={[styles.serviceItem, dynamicStyle]}>
-            <FastImage
-                resizeMode="cover"
-                source={{ uri: item.backgroundUrl }}
-                style={[styles.serviceBg, { width: this.serviceItemWidth, }]} />
-            <View
-                style={styles.serviceItemOverlay} />
-            <Text
-                style={styles.serviceName}>
-                {item.name}
-            </Text>
-        </Pressable>)
+        return (<ServiceItem
+            item={item}
+            index={index}
+            serviceItemWidth={this.serviceItemWidth}
+            serviceItemHeight={this.serviceItemHeight}
+            serviceItemMargin={this.serviceItemMargin}
+        />)
     }
 
     renderServices = () => {
@@ -125,7 +120,8 @@ export default class HomeScreen extends Component {
                     showsPagination={false}
                     autoplay
                     loop>
-                    {data.map(it => <FastImage
+                    {data.map((it, index) => <FastImage
+                        key={`${index}`}
                         resizeMode={'cover'}
                         source={{ uri: it.backgroundUrl }}
                         style={{ flex: 1 }} />)}
