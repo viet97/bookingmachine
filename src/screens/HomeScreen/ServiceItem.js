@@ -14,13 +14,15 @@ export default class ServiceItem extends Component {
         }
     }
     onPressService = async () => {
-        try {
-            this.setState({ isLoading: true })
-            const response = await ManagerApi.bookLocal()
-        } catch (error) {
+        const { printTextTest, printBillTest } = this.props
+        printTextTest()
+        // try {
+        //     this.setState({ isLoading: true })
+        //     const response = await ManagerApi.bookLocal()
+        // } catch (error) {
 
-        }
-        this.setState({ isLoading: false })
+        // }
+        // this.setState({ isLoading: false })
     }
 
     render() {
