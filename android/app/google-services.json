@@ -1,0 +1,160 @@
+{
+  "project_info": {
+    "project_number": "768372611565",
+    "firebase_url": "https://vidoctor-vn-dev.firebaseio.com",
+    "project_id": "vidoctor-vn-dev",
+    "storage_bucket": "vidoctor-vn-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768372611565:android:bca73be1d7ba6d5f4a2fe4",
+        "android_client_info": {
+          "package_name": "com.vidoctor.gate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768372611565-qeklacsqd9tb9vqlvqlv05efclqodvj5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJIfBE_bLzaY7uFfgSHC6v97UYFkpR9hg"
+        },
+        {
+          "current_key": "AIzaSyCD-1KOVjgIP9S0_ArLYp8GVKXyHWnYM3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768372611565-qeklacsqd9tb9vqlvqlv05efclqodvj5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "768372611565-6emprgi8jdnhrk2jkcrcnijkjpkuqpve.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.neogroup.vidoctor.dev"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768372611565:android:fa93426aaa0734e4",
+        "android_client_info": {
+          "package_name": "vn.chemedic.vidoctor.admin.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768372611565-1q2ncue9glieq7kc0m28snmvv9u9il78.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.chemedic.vidoctor.admin.dev",
+            "certificate_hash": "0808d5a9d64bdbb4a009a520c586a861542423e0"
+          }
+        },
+        {
+          "client_id": "768372611565-aam2s8dnim6l452rmmma9b95m7hrjq7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.chemedic.vidoctor.admin.dev",
+            "certificate_hash": "69ec390bd3e09c0a5e632f4f967c1bd4877c2c10"
+          }
+        },
+        {
+          "client_id": "768372611565-qeklacsqd9tb9vqlvqlv05efclqodvj5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJIfBE_bLzaY7uFfgSHC6v97UYFkpR9hg"
+        },
+        {
+          "current_key": "AIzaSyCD-1KOVjgIP9S0_ArLYp8GVKXyHWnYM3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768372611565-qeklacsqd9tb9vqlvqlv05efclqodvj5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "768372611565-6emprgi8jdnhrk2jkcrcnijkjpkuqpve.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.neogroup.vidoctor.dev"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768372611565:android:27a5067c87720fed",
+        "android_client_info": {
+          "package_name": "vn.chemedic.vidoctor.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768372611565-311r7go5j3ir4b4elo5ptogknlmm9vgh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.chemedic.vidoctor.dev",
+            "certificate_hash": "8508f208e4762717b37ec52f7dbfa11ee07ea668"
+          }
+        },
+        {
+          "client_id": "768372611565-lj7b38hpcm6loqppqtr3ggikk73npevd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.chemedic.vidoctor.dev",
+            "certificate_hash": "69ec390bd3e09c0a5e632f4f967c1bd4877c2c10"
+          }
+        },
+        {
+          "client_id": "768372611565-qeklacsqd9tb9vqlvqlv05efclqodvj5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJIfBE_bLzaY7uFfgSHC6v97UYFkpR9hg"
+        },
+        {
+          "current_key": "AIzaSyCD-1KOVjgIP9S0_ArLYp8GVKXyHWnYM3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768372611565-qeklacsqd9tb9vqlvqlv05efclqodvj5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "768372611565-6emprgi8jdnhrk2jkcrcnijkjpkuqpve.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.neogroup.vidoctor.dev"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

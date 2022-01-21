@@ -14,19 +14,18 @@ export default class ServiceItem extends Component {
         }
     }
     onPressService = async () => {
-        const { printTextTest, printBillTest } = this.props
-        printTextTest()
-        // try {
-        //     this.setState({ isLoading: true })
-        //     const response = await ManagerApi.bookLocal()
-        // } catch (error) {
-
-        // }
-        // this.setState({ isLoading: false })
+        const { onPressServiceItem } = this.props
+        try {
+            this.setState({ isLoading: true })
+            await onPressServiceItem()
+        } catch (error) {
+            console.error("onPressServiceItem", e)
+        }
+        this.setState({ isLoading: false })
     }
 
     render() {
-        const { item, index, serviceItemWidth, serviceItemHeight, serviceItemMargin } = this.props
+        const { item, index, serviceItemWidth, disabled, serviceItemMargin } = this.props
         const { isLoading } = this.state
         const isFirstColumn = index % 2 === 0
         const isFirstRow = index <= 1
@@ -36,7 +35,7 @@ export default class ServiceItem extends Component {
             width: serviceItemWidth,
         }
         return (<Pressable
-            disabled={isLoading}
+            disabled={isLoading || disabled}
             onPress={this.onPressService}
             style={[styles.serviceItem, dynamicStyle]}>
             <FastImage

@@ -1,4 +1,5 @@
 import axios from "axios"
+import firestore from '@react-native-firebase/firestore';
 
 const baseUrl = "https://videv-queue.casperpas.dev/api/v1/ticket/"
 const serviceId = "TbypX9PFPrnMMYsAAfiu"
@@ -56,7 +57,17 @@ const bookLocal = () => {
     })
 }
 
+const getCollection = (name) => {
+    return firestore().collection(name)
+}
+
+const getPartner = () => {
+    return getCollection("partners").doc(partner).get()
+}
+
 export default {
     list,
-    bookLocal
+    bookLocal,
+    getCollection,
+    getPartner
 }
