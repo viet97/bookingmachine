@@ -1,6 +1,15 @@
 import { size } from 'lodash'
 import React, { Component } from 'react'
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, View, BackHandler, Platform } from 'react-native'
+import {
+    ActivityIndicator,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    View,
+    BackHandler,
+    Platform
+} from 'react-native'
+import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
@@ -9,6 +18,7 @@ import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
 import { Colors } from '../../themes/Colors'
 import { pixel, widthDevice } from '../../utils/DeviceUtil'
+import { stringToSlug } from '../../utils/StringUtils'
 import ServiceItem from './ServiceItem'
 
 const data = [
@@ -61,26 +71,37 @@ export default class HomeScreen extends Component {
         super(props)
         this.state = {
             partner: null,
-            isFetching: false
+            isFetching: false,
         }
         this.serviceItemWidth = (widthDevice - pixel(180)) / 2
         this.serviceItemHeight = pixel(280)
         this.maxServiceRow = 3
         this.serviceItemMargin = pixel(48)
         this.maxServiceListHeight = this.serviceItemHeight * this.maxServiceRow + this.serviceItemMargin * (this.maxServiceRow - 1)
+        this.countPressLogo = 5
+        this.currentCountPressLogo = 0
+        this.countPressLogoTimeout = null
+        this.timeoutCloseMessage = null
+    }
+
+    initPrinter = async () => {
+        await BLEPrinter.closeConn()
+        setTimeout(() => {
+            BLEPrinter.init().then(() => {
+                BLEPrinter.getDeviceList().then(printers => {
+                    if (size(printers) > 0) {
+                        this.connectPrinter(printers[0])
+                    }
+                });
+            });
+        }, 500)
+
     }
 
     fetchData = async () => {
         const partner = await (await ManagerApi.getPartner())?.data()
         this.setState({ partner })
-        BLEPrinter.init().then(() => {
-            BLEPrinter.getDeviceList().then(printers => {
-                console.log("printers", printers)
-                // if (size(printers) > 0) {
-                //     this.connectPrinter(printers[0])
-                // }
-            });
-        });
+        this.initPrinter()
     }
 
     connectPrinter = (printer) => {
@@ -93,14 +114,18 @@ export default class HomeScreen extends Component {
     checkPrinter = () => {
         if (!this.state.printer) {
             alert("No printer connected")
+            this.initPrinter()
             return false
         }
         return true
     }
 
-    printTextTest = () => {
+    printTextTest = (number, service) => {
         if (!this.checkPrinter()) return
-        BLEPrinter.printText("<C>sample text</C>\n");
+        BLEPrinter.printBill(`<D>${stringToSlug(this.state.partner?.name)}</D>\n\n<CB>${number}</CB>\n\n<D>${stringToSlug(service?.name)}</D>\n`, {
+            beep: true,
+            cut: true,
+        });
     }
 
     printBillTest = () => {
@@ -112,11 +137,45 @@ export default class HomeScreen extends Component {
         this.fetchData()
     }
 
+    clearTimeoutLogoPress = () => {
+        if (this.countPressLogoTimeout) {
+            clearTimeout(this.countPressLogoTimeout)
+            this.countPressLogoTimeout = null
+        }
+    }
+
+    setTimeoutMessage = () => {
+        this.timeoutCloseMessage = setTimeout(() => {
+            this.setState({ showAlert: false })
+        }, 3000)
+    }
+
+    clearTimeoutMessage = () => {
+        if (this.timeoutCloseMessage) {
+            clearTimeout(this.timeoutCloseMessage)
+            this.timeoutCloseMessage = null
+        }
+    }
+
+    pressLogo = () => {
+        this.clearTimeoutLogoPress()
+        this.currentCountPressLogo++
+        if (this.currentCountPressLogo >= this.countPressLogo) {
+            this.initPrinter()
+            this.currentCountPressLogo = 0;
+            this.clearTimeoutLogoPress()
+        }
+        this.countPressLogoTimeout = setTimeout(() => {
+            this.currentCountPressLogo = 0;
+        }, 3000)
+    }
+
     renderHeader = () => {
         const { partner } = this.state
         return <View
             style={styles.headerContainer}>
             <Pressable
+                onPress={this.pressLogo}
                 delayLongPress={10000}
                 onLongPress={() => {
                     if (Platform.OS === 'android')
@@ -141,13 +200,17 @@ export default class HomeScreen extends Component {
         </View>
     }
 
-    onPressServiceItem = async () => {
+    onPressServiceItem = async (service) => {
         this.setState({ isFetching: true })
         try {
             const response = await ManagerApi.bookLocal()
             if (response?.data?.status === 200) {
                 const numberTicket = response?.data?.data?.numberTicket
-                alert(`Number ticket: ${numberTicket}`)
+                this.setState({
+                    message: `Number ticket: ${numberTicket}`,
+                    showAlert: true
+                }, this.setTimeoutMessage)
+                this.printTextTest(numberTicket, service)
             }
         } catch (e) {
             console.error("bookLocal error", e)
@@ -163,7 +226,7 @@ export default class HomeScreen extends Component {
             serviceItemWidth={this.serviceItemWidth}
             serviceItemHeight={this.serviceItemHeight}
             serviceItemMargin={this.serviceItemMargin}
-            onPressServiceItem={this.onPressServiceItem}
+            onPressServiceItem={() => this.onPressServiceItem(item)}
         />)
     }
 
@@ -205,6 +268,7 @@ export default class HomeScreen extends Component {
     }
 
     render() {
+        const { partner, message, showAlert } = this.state
         if (!this.state.partner) return <View
             style={styles.containerLoading}>
             <ActivityIndicator size={"large"} />
@@ -220,6 +284,22 @@ export default class HomeScreen extends Component {
                     {this.renderServices()}
                     {this.renderSwiper()}
                 </View>
+                <AwesomeAlert
+                    show={showAlert}
+                    showProgress={false}
+                    message={message}
+                    closeOnTouchOutside={true}
+                    closeOnHardwareBackPress={false}
+                    showConfirmButton
+                    confirmText="OK"
+                    onDismiss={() => {
+                        this.clearTimeoutMessage()
+                        this.setState({ showAlert: false })
+                    }}
+                    onConfirmPressed={() => {
+                        this.setState({ showAlert: false })
+                    }}
+                />
             </LinearGradient>
         )
     }
