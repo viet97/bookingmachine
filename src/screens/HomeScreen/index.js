@@ -85,7 +85,11 @@ export default class HomeScreen extends Component {
     }
 
     initPrinter = async () => {
-        await BLEPrinter.closeConn()
+        try {
+            await BLEPrinter.closeConn()
+        } catch (e) {
+
+        }
         setTimeout(() => {
             BLEPrinter.init().then(() => {
                 BLEPrinter.getDeviceList().then(printers => {

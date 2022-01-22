@@ -1,0 +1,12 @@
+diff --git a/node_modules/react-native-thermal-receipt-printer/android/src/main/java/com/pinmi/react/printer/RNBLEPrinterModule.java b/node_modules/react-native-thermal-receipt-printer/android/src/main/java/com/pinmi/react/printer/RNBLEPrinterModule.java
+index d7c2ea2..8b29dee 100644
+--- a/node_modules/react-native-thermal-receipt-printer/android/src/main/java/com/pinmi/react/printer/RNBLEPrinterModule.java
++++ b/node_modules/react-native-thermal-receipt-printer/android/src/main/java/com/pinmi/react/printer/RNBLEPrinterModule.java
+@@ -43,6 +43,7 @@ public class RNBLEPrinterModule extends ReactContextBaseJavaModule implements RN
+     @ReactMethod
+     @Override
+     public void closeConn()  {
++        if(adapter == null) return;
+         adapter.closeConnectionIfExists();
+     }
+ 
