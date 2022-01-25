@@ -180,7 +180,7 @@ export default class HomeScreen extends Component {
             style={styles.headerContainer}>
             <Pressable
                 onPress={this.pressLogo}
-                delayLongPress={10000}
+                delayLongPress={7000}
                 onLongPress={() => {
                     if (Platform.OS === 'android')
                         BackHandler.exitApp()
