@@ -11,7 +11,6 @@ import android.view.WindowManager;
 import androidx.annotation.RequiresApi;
 
 import com.facebook.react.ReactActivity;
-s
 public class MainActivity extends ReactActivity {
     private static final String TAG = "MainActivity";
     private DevicePolicyManager dpm;
