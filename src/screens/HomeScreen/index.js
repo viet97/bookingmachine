@@ -8,6 +8,7 @@ import {
     View,
     BackHandler,
     Image,
+    NativeModules
 } from 'react-native'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
@@ -21,6 +22,7 @@ import { pixel, widthDevice } from '../../utils/DeviceUtil'
 import { stringToSlug } from '../../utils/StringUtils'
 import ServiceItem from './ServiceItem'
 
+const closeKiosMode = NativeModules && NativeModules.AndroidUtils && NativeModules.AndroidUtils.closeKiosMode
 const data = [
     {
         id: 1,
@@ -105,7 +107,7 @@ export default class HomeScreen extends Component {
             BLEPrinter.init().then(() => {
                 BLEPrinter.getDeviceList().then(printers => {
                     if (size(printers) > 0) {
-                        this.connectPrinter(printers[0])
+                        this.connectPrinter(printers[0], true)
                     }
                 });
             });
@@ -119,7 +121,7 @@ export default class HomeScreen extends Component {
         this.initPrinter()
     }
 
-    connectPrinter = (printer) => {
+    connectPrinter = (printer, showAlert) => {
         //connect printer
         BLEPrinter.connectPrinter(printer.inner_mac_address).then(
             printer => this.setState({ printer }),
@@ -193,8 +195,9 @@ export default class HomeScreen extends Component {
             <Pressable
                 onPress={this.pressLogo}
                 delayLongPress={7000}
-                onLongPress={() => {
-                    BackHandler.exitApp()
+                onLongPress={async () => {
+                    await closeKiosMode()
+                    alert("Lock mode disabled!")
                 }}>
                 <Image
                     resizeMode={'cover'}
