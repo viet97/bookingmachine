@@ -213,7 +213,7 @@ export default class HomeScreen extends Component {
                 <Text
                     numberOfLines={2}
                     semiBold
-                    style={styles.welcomeText}>Kính chào quý khách!</Text>
+                    style={styles.welcomeText}>Quý khách ấn chuyên khoa để lấy số</Text>
             </View>
         </View>
     }
