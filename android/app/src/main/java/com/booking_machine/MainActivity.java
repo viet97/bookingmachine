@@ -11,15 +11,25 @@ import android.view.WindowManager;
 import androidx.annotation.RequiresApi;
 
 import com.facebook.react.ReactActivity;
-s
 public class MainActivity extends ReactActivity {
     private static final String TAG = "MainActivity";
     private DevicePolicyManager dpm;
     private ComponentName adminName;
+    private static MainActivity instance;
 
+    public static MainActivity getInstance() {
+        return instance;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        instance = null;
     }
 
     private void setupDPM() {
@@ -35,6 +45,10 @@ public class MainActivity extends ReactActivity {
         if (dpm.isLockTaskPermitted(getPackageName())) {
             startLockTask();
         }
+    }
+
+    public void closeKiosMode(){
+        stopLockTask();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
