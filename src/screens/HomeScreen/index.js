@@ -7,7 +7,6 @@ import {
     StyleSheet,
     View,
     BackHandler,
-    Platform
 } from 'react-native'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
@@ -162,6 +161,7 @@ export default class HomeScreen extends Component {
     }
 
     pressLogo = () => {
+        BackHandler.exitApp()
         this.clearTimeoutLogoPress()
         this.currentCountPressLogo++
         if (this.currentCountPressLogo >= this.countPressLogo) {
@@ -182,8 +182,7 @@ export default class HomeScreen extends Component {
                 onPress={this.pressLogo}
                 delayLongPress={7000}
                 onLongPress={() => {
-                    if (Platform.OS === 'android')
-                        BackHandler.exitApp()
+                    BackHandler.exitApp()
                 }}>
                 <FastImage
                     resizeMode={'contain'}
