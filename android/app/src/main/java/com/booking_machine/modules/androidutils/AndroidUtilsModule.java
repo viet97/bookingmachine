@@ -2,6 +2,7 @@ package com.booking_machine.modules.androidutils;
 
 import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -40,6 +41,21 @@ public class AndroidUtilsModule extends ReactContextBaseJavaModule {
     @ReactMethod(isBlockingSynchronousMethod = true)
     public void clearDeviceOwner() {
         AndroidUtilsManager.getInstance().clearDeviceOwner();
+    }
+
+    @ReactMethod
+    public void closeConnect(Promise promise) {
+        AndroidUtilsManager.getInstance().closeConnect(promise);
+    }
+
+    @ReactMethod
+    public void print(String pattern, Promise promise) {
+        AndroidUtilsManager.getInstance().print(pattern, promise);
+    }
+
+    @ReactMethod
+    public void scanAndConnectUsbPrinter(Promise promise) {
+        AndroidUtilsManager.getInstance().scanAndConnect(promise);
     }
 }
 

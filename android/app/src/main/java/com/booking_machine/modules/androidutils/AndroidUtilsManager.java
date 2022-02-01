@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.booking_machine.MainActivity;
+import com.facebook.react.bridge.Promise;
 
 
 public class AndroidUtilsManager {
@@ -22,5 +23,17 @@ public class AndroidUtilsManager {
 
     public void clearDeviceOwner() {
         MainActivity.getInstance().clearDeviceOwner();
+    }
+
+    public void closeConnect(Promise promise) {
+        MainActivity.getInstance().closeConnectPrinter(promise);
+    }
+
+    public void scanAndConnect(Promise promise) {
+        MainActivity.getInstance().scanAndConnectPrinter(promise);
+    }
+
+    public void print(String pattern, Promise promise) {
+        MainActivity.getInstance().print(pattern, promise);
     }
 }

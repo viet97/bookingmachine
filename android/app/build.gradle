@@ -213,6 +213,7 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation "org.webkit:android-jsc:+"
     implementation 'com.facebook.soloader:soloader:0.9.0+'
+    implementation 'com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.0.1'
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
     }

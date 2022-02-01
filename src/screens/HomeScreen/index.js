@@ -13,7 +13,6 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
-import { USBPrinter } from 'react-native-thermal-receipt-printer'
 import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
 import { Colors } from '../../themes/Colors'
@@ -21,8 +20,8 @@ import { pixel, widthDevice } from '../../utils/DeviceUtil'
 import { stringToSlug } from '../../utils/StringUtils'
 import ServiceItem from './ServiceItem'
 
-const closeKiosMode = NativeModules && NativeModules.AndroidUtils && NativeModules.AndroidUtils.closeKiosMode
-const clearDeviceOwner = NativeModules && NativeModules.AndroidUtils && NativeModules.AndroidUtils.clearDeviceOwner
+const { closeKiosMode, clearDeviceOwner, closeConnect, scanAndConnectUsbPrinter, print } = NativeModules.AndroidUtils
+
 const data = [
     {
         id: 1,
@@ -89,18 +88,18 @@ export default class HomeScreen extends Component {
 
     initPrinter = async () => {
         try {
-            await USBPrinter.closeConn()
+            await closeConnect()
+            this.setState({ printer: false })
         } catch (e) {
 
         }
         setTimeout(() => {
-            USBPrinter.init().then(() => {
-                USBPrinter.getDeviceList().then(printers => {
-                    if (size(printers) > 0) {
-                        this.connectPrinter(printers[0], true)
-                    }
-                });
-            });
+            scanAndConnectUsbPrinter().then(() => {
+                this.setState({ printer: true })
+                alert("Printer Connected")
+            }).catch(() => {
+                console.error("cannot connect usb printer")
+            })
         }, 500)
 
     }
@@ -109,13 +108,6 @@ export default class HomeScreen extends Component {
         const partner = await (await ManagerApi.getPartner())?.data()
         this.setState({ partner })
         this.initPrinter()
-    }
-
-    connectPrinter = (printer, showAlert) => {
-        //connect printer
-        USBPrinter.connectPrinter(printer.vendor_id, printer.product_id).then(
-            printer => this.setState({ printer }),
-            error => console.warn(error))
     }
 
     checkPrinter = () => {
@@ -127,10 +119,13 @@ export default class HomeScreen extends Component {
         return true
     }
 
-    printTextTest = (number, service) => {
+    printTicket = (number, service) => {
         if (!this.checkPrinter()) return
-        USBPrinter.printText(`<CD>${stringToSlug(this.state.partner?.name)}</CD>\n\n<CD>${number}</CD>\n\n<CD>${stringToSlug(service?.name)}</CD>\n\n\n\n\n`, {
-        });
+        return print(
+            `[C]<b><font size='wide'>${stringToSlug(this.state.partner.name)}</font></b>\n` +
+            `[C]<b><font size='wide'>${stringToSlug(`${number}`)}</font></b>\n` +
+            `[C]<b><font size='wide'>${stringToSlug(service.name)}</font></b>\n`
+        );
     }
 
     componentDidMount() {
@@ -200,10 +195,15 @@ export default class HomeScreen extends Component {
     }
 
     onPressServiceItem = async (service) => {
-        this.printTextTest(this.ticketNumber, service)
-        this.ticketNumber += 2
-        return
         this.setState({ isFetching: true })
+        try {
+            await this.printTicket(this.ticketNumber, service)
+        } catch (e) {
+            console.error("printError")
+        }
+        this.ticketNumber += 2
+        this.setState({ isFetching: false })
+        return
         try {
             const response = await ManagerApi.bookLocal()
             if (response?.data?.status === 200) {
@@ -212,12 +212,12 @@ export default class HomeScreen extends Component {
                     message: `Number ticket: ${numberTicket}`,
                     showAlert: true
                 }, this.setTimeoutMessage)
-                this.printTextTest(numberTicket, service)
+                this.printTicket(numberTicket, service)
             }
         } catch (e) {
             console.error("bookLocal error", e)
         }
-        this.setState({ isFetching: false })
+
     }
 
     renderItem = ({ item, index }) => {
