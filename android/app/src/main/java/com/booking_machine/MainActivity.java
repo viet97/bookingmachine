@@ -50,6 +50,9 @@ public class MainActivity extends ReactActivity {
     public void closeKiosMode(){
         stopLockTask();
     }
+    public void clearDeviceOwner(){
+        dpm.clearDeviceOwnerApp(getPackageName());
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override

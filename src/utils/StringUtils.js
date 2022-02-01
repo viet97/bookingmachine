@@ -1,3 +1,5 @@
+import { startCase, toLower } from "lodash";
+
 export function stringToSlug(str) {
     // remove accents
     var from = "àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ",
@@ -11,5 +13,5 @@ export function stringToSlug(str) {
         .replace(/[^a-z0-9\-]/g, '-')
         .replace(/-+/g, ' ');
 
-    return str;
+    return startCase(toLower(str));
 }

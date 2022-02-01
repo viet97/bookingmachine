@@ -31,9 +31,15 @@ public class AndroidUtilsModule extends ReactContextBaseJavaModule {
     public String getName() {
         return "AndroidUtils";
     }
+
     @ReactMethod(isBlockingSynchronousMethod = true)
     public void closeKiosMode() {
         AndroidUtilsManager.getInstance().closeKiosMode();
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public void clearDeviceOwner() {
+        AndroidUtilsManager.getInstance().clearDeviceOwner();
     }
 }
 

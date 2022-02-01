@@ -15,7 +15,12 @@ public class AndroidUtilsManager {
     public static AndroidUtilsManager getInstance() {
         return instance;
     }
-    public void closeKiosMode(){
+
+    public void closeKiosMode() {
         MainActivity.getInstance().closeKiosMode();
+    }
+
+    public void clearDeviceOwner() {
+        MainActivity.getInstance().clearDeviceOwner();
     }
 }

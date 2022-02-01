@@ -13,7 +13,7 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
-import { BLEPrinter } from 'react-native-thermal-receipt-printer'
+import { USBPrinter } from 'react-native-thermal-receipt-printer'
 import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
 import { Colors } from '../../themes/Colors'
@@ -22,6 +22,7 @@ import { stringToSlug } from '../../utils/StringUtils'
 import ServiceItem from './ServiceItem'
 
 const closeKiosMode = NativeModules && NativeModules.AndroidUtils && NativeModules.AndroidUtils.closeKiosMode
+const clearDeviceOwner = NativeModules && NativeModules.AndroidUtils && NativeModules.AndroidUtils.clearDeviceOwner
 const data = [
     {
         id: 1,
@@ -83,17 +84,18 @@ export default class HomeScreen extends Component {
         this.currentCountPressLogo = 0
         this.countPressLogoTimeout = null
         this.timeoutCloseMessage = null
+        this.ticketNumber = 1000
     }
 
     initPrinter = async () => {
         try {
-            await BLEPrinter.closeConn()
+            await USBPrinter.closeConn()
         } catch (e) {
 
         }
         setTimeout(() => {
-            BLEPrinter.init().then(() => {
-                BLEPrinter.getDeviceList().then(printers => {
+            USBPrinter.init().then(() => {
+                USBPrinter.getDeviceList().then(printers => {
                     if (size(printers) > 0) {
                         this.connectPrinter(printers[0], true)
                     }
@@ -111,7 +113,7 @@ export default class HomeScreen extends Component {
 
     connectPrinter = (printer, showAlert) => {
         //connect printer
-        BLEPrinter.connectPrinter(printer.inner_mac_address).then(
+        USBPrinter.connectPrinter(printer.vendor_id, printer.product_id).then(
             printer => this.setState({ printer }),
             error => console.warn(error))
     }
@@ -127,21 +129,13 @@ export default class HomeScreen extends Component {
 
     printTextTest = (number, service) => {
         if (!this.checkPrinter()) return
-        BLEPrinter.printBill(`<D>${stringToSlug(this.state.partner?.name)}</D>\n\n<CB>${number}</CB>\n\n<D>${stringToSlug(service?.name)}</D>\n`, {
-            beep: true,
-            cut: true,
+        USBPrinter.printText(`<CD>${stringToSlug(this.state.partner?.name)}</CD>\n\n<CD>${number}</CD>\n\n<CD>${stringToSlug(service?.name)}</CD>\n\n\n\n\n`, {
         });
-    }
-
-    printBillTest = () => {
-        if (!this.checkPrinter()) return
-        BLEPrinter.printBill("<C>sample bill</C>");
     }
 
     componentDidMount() {
         this.fetchData()
     }
-
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {
             clearTimeout(this.countPressLogoTimeout)
@@ -163,7 +157,6 @@ export default class HomeScreen extends Component {
     }
 
     pressLogo = () => {
-        BackHandler.exitApp()
         this.clearTimeoutLogoPress()
         this.currentCountPressLogo++
         if (this.currentCountPressLogo >= this.countPressLogo) {
@@ -207,6 +200,9 @@ export default class HomeScreen extends Component {
     }
 
     onPressServiceItem = async (service) => {
+        this.printTextTest(this.ticketNumber, service)
+        this.ticketNumber += 2
+        return
         this.setState({ isFetching: true })
         try {
             const response = await ManagerApi.bookLocal()
