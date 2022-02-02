@@ -63,7 +63,6 @@ public class MainActivity extends ReactActivity {
         UsbConnection usbConnection = UsbPrintersConnections.selectFirstConnected(this);
         UsbManager usbManager = (UsbManager) this.getSystemService(Context.USB_SERVICE);
         if (usbConnection != null && usbManager != null) {
-            Log.d(TAG, "scanAndConnectPrinter: ");
             PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(MainActivity.ACTION_USB_PERMISSION), 0);
             usbManager.requestPermission(usbConnection.getDevice(), permissionIntent);
             this.promise = promise;
@@ -130,7 +129,7 @@ public class MainActivity extends ReactActivity {
     private void enableLockMode() {
         setupDPM();
         if (dpm == null || !dpm.isDeviceOwnerApp(getPackageName())) return;
-        dpm.setLockTaskPackages(adminName, new String[]{getPackageName(), "com.sample.child"});
+        dpm.setLockTaskPackages(adminName, new String[]{getPackageName(), "com.android.systemui"});
         if (dpm.isLockTaskPermitted(getPackageName())) {
             startLockTask();
         }
