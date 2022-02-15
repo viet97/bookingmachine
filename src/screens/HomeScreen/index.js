@@ -1,4 +1,3 @@
-import { size } from 'lodash'
 import React, { Component } from 'react'
 import {
     ActivityIndicator,
@@ -6,7 +5,7 @@ import {
     Pressable,
     StyleSheet,
     View,
-    BackHandler,
+    DeviceEventEmitter,
     NativeModules
 } from 'react-native'
 import AwesomeAlert from 'react-native-awesome-alerts'
@@ -128,8 +127,18 @@ export default class HomeScreen extends Component {
         );
     }
 
+    onKeyDown = (charCode) => {
+        alert(charCode)
+    }
+
     componentDidMount() {
         this.fetchData()
+        this.listenerKeyDown = DeviceEventEmitter.addListener('onKeyDown', this.onKeyDown);
+
+    }
+    componentWillUnmount() {
+        this.listenerKeyDown && this.listenerKeyDown.remove()
+        this.listenerKeyDown = null
     }
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {

@@ -12,9 +12,11 @@ import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.dantsu.escposprinter.EscPosPrinter;
@@ -25,7 +27,11 @@ import com.dantsu.escposprinter.exceptions.EscPosConnectionException;
 import com.dantsu.escposprinter.exceptions.EscPosEncodingException;
 import com.dantsu.escposprinter.exceptions.EscPosParserException;
 import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class MainActivity extends ReactActivity {
     private static final String TAG = "MainActivity";
@@ -58,6 +64,12 @@ public class MainActivity extends ReactActivity {
             }
         }
     };
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        sendEvent("onKeyDown",  event.getUnicodeChar());
+        return super.onKeyDown(keyCode, event);
+    }
 
     public void scanAndConnectPrinter(Promise promise) {
         UsbConnection usbConnection = UsbPrintersConnections.selectFirstConnected(this);
@@ -163,6 +175,16 @@ public class MainActivity extends ReactActivity {
      * Returns the name of the main component registered from JavaScript. This is used to schedule
      * rendering of the component.
      */
+    private void sendEvent(
+            String eventName,
+            @Nullable Object data) {
+        ReactInstanceManager mReactInstanceManager = getReactNativeHost().getReactInstanceManager();
+        ReactApplicationContext context = (ReactApplicationContext) mReactInstanceManager.getCurrentReactContext();
+        if (context == null) return;
+        context
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, data);
+    }
 
     @Override
     protected String getMainComponentName() {
