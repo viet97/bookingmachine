@@ -127,13 +127,13 @@ export default class HomeScreen extends Component {
         );
     }
 
-    onKeyDown = (charCode) => {
-        alert(charCode)
+    onBarcodeScan = (payload) => {
+        console.log("payload", payload)
     }
 
     componentDidMount() {
         this.fetchData()
-        this.listenerKeyDown = DeviceEventEmitter.addListener('onKeyDown', this.onKeyDown);
+        this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
 
     }
     componentWillUnmount() {

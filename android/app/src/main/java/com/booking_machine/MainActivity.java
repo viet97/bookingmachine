@@ -28,9 +28,11 @@ import com.dantsu.escposprinter.exceptions.EscPosEncodingException;
 import com.dantsu.escposprinter.exceptions.EscPosParserException;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class MainActivity extends ReactActivity {
@@ -64,11 +66,20 @@ public class MainActivity extends ReactActivity {
             }
         }
     };
+    private String barcode = "";
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        sendEvent("onKeyDown",  event.getUnicodeChar());
-        return super.onKeyDown(keyCode, event);
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        if (e.getAction() == KeyEvent.ACTION_DOWN) {
+            char pressedKey = (char) e.getUnicodeChar();
+            barcode += pressedKey;
+        }
+        if (e.getAction() == KeyEvent.ACTION_DOWN && e.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+            WritableMap map = Arguments.createMap();
+            sendEvent("onBarcodeScan",  barcode.replaceAll("\\P{Print}", ""));
+            barcode = "";
+        }
+        return super.dispatchKeyEvent(e);
     }
 
     public void scanAndConnectPrinter(Promise promise) {
