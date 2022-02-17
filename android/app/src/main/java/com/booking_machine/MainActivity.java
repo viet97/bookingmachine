@@ -75,7 +75,6 @@ public class MainActivity extends ReactActivity {
             barcode += pressedKey;
         }
         if (e.getAction() == KeyEvent.ACTION_DOWN && e.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-            WritableMap map = Arguments.createMap();
             sendEvent("onBarcodeScan",  barcode.replaceAll("\\P{Print}", ""));
             barcode = "";
         }
