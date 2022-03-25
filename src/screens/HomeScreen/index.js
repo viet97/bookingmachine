@@ -83,6 +83,7 @@ export default class HomeScreen extends Component {
         this.countPressLogoTimeout = null
         this.timeoutCloseMessage = null
         this.ticketNumber = 1000
+        // this.ws = new WebSocket("ws://192.168.31.89:3001")
     }
 
     initPrinter = async () => {
@@ -106,6 +107,11 @@ export default class HomeScreen extends Component {
     fetchData = async () => {
         const partner = await (await ManagerApi.getPartner())?.data()
         this.setState({ partner })
+        const apisData = await (await ManagerApi.apis()).data
+        if (apisData) {
+            const { lanes, tickets } = apisData
+            this.setState({ lanes, tickets })
+        }
         this.initPrinter()
     }
 
@@ -134,6 +140,25 @@ export default class HomeScreen extends Component {
     componentDidMount() {
         this.fetchData()
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
+        // this.ws.addEventListener('open', (event) => {
+        //     // socket.send('Hello Server!')
+        //     console.log("Hello Server")
+        //     this.ws.send(JSON.stringify({
+        //         action: "add",
+        //         data: {
+        //             lane: "1"
+        //         }
+        //     }))
+        // });
+        // this.ws.addEventListener('close', e => {
+        //     console.log("disconnect", e)
+
+        // })
+        // // Listen for messages
+        // this.ws.addEventListener('message', function (event) {
+        //     console.log('Message from server ', event.data);
+        // });
+
 
     }
     componentWillUnmount() {
@@ -213,25 +238,20 @@ export default class HomeScreen extends Component {
     onPressServiceItem = async (service) => {
         this.setState({ isFetching: true })
         try {
-            await this.printTicket(this.ticketNumber, service)
-        } catch (e) {
-            console.error("printError")
-        }
-        this.ticketNumber += 2
-        this.setState({ isFetching: false })
-        return
-        try {
-            const response = await ManagerApi.bookLocal()
-            if (response?.data?.status === 200) {
-                const numberTicket = response?.data?.data?.numberTicket
+            const response = await ManagerApi.add(service._id)
+            if (response?.status === 200) {
+                console.log("onPressServiceItem", response.data)
+                const numberTicket = response?.data?.ticket?.number
                 this.setState({
                     message: `Number ticket: ${numberTicket}`,
                     showAlert: true
                 }, this.setTimeoutMessage)
                 this.printTicket(numberTicket, service)
+                this.setState({ isFetching: false })
             }
         } catch (e) {
-            console.error("bookLocal error", e)
+            this.setState({ isFetching: false })
+            console.error("add error", e)
         }
 
     }
@@ -249,10 +269,12 @@ export default class HomeScreen extends Component {
     }
 
     renderServices = () => {
+        const { lanes } = this.state
+        if (!lanes) return null
         return <View>
             <FlatList
                 numColumns={2}
-                data={data}
+                data={lanes}
                 keyExtractor={(item, index) => `${item.id}${index}`}
                 renderItem={this.renderItem}
                 showsVerticalScrollIndicator={false}

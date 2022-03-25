@@ -1,0 +1,43 @@
+Send:
+
+{
+  action: "add"
+  data: {
+    lane: "lane_id"
+  }
+}
+
+
+{
+  action: "cancel"
+  data: {
+    ticket: "ticketid"
+  }
+}
+
+Receive:
+
+{
+  event: "ticketUpdated",
+  data: {
+    ticket: {
+      _id: "ticketId",
+      lane: "laneId",
+      number: 2,
+      created: "2022-03-12T22:34:50.123Z"
+    }
+  }
+}
+
+{
+  event: "ticketUpdated",
+  data: {
+    ticket: {
+      _id: "ticketId",
+      lane: "laneId",
+      number: 2,
+      created: "2022-03-12T22:34:50.123Z",
+      canceled: "2022-03-13T12:34:50.623Z"
+    }
+  }
+}
