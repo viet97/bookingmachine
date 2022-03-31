@@ -5,6 +5,7 @@ import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
 import { Colors } from '../../themes/Colors'
 import { pixel } from '../../utils/DeviceUtil'
+import { resolveImagePath } from '../../utils/ImageUtil'
 
 export default class ServiceItem extends Component {
     constructor(props) {
@@ -40,7 +41,7 @@ export default class ServiceItem extends Component {
             style={[styles.serviceItem, dynamicStyle]}>
             <FastImage
                 resizeMode="cover"
-                source={{ uri: item.backgroundUrl }}
+                source={{ uri: resolveImagePath(item.cover) }}
                 style={[styles.serviceBg, { width: serviceItemWidth }]} />
             <View
                 style={styles.serviceItemOverlay} />

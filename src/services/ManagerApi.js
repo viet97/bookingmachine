@@ -1,11 +1,11 @@
 import axios from "axios"
 import firestore from '@react-native-firebase/firestore';
+import { API_URL } from "@env"
 
 // const baseUrl = "https://videv-queue.casperpas.dev/api/v1/ticket/"
-const baseUrl = "http://localhost:3000/"
+const baseUrl = API_URL
 const serviceId = "TbypX9PFPrnMMYsAAfiu"
 const partner = "DxpHgJHNr2Pma0wwSDc7"
-
 const path = {
     list: 'list',
     next: 'next',
@@ -17,7 +17,8 @@ const path = {
     update: 'update',
     add: 'apis/add',
     cancel: 'apis/cancel',
-    apis: 'apis'
+    apis: 'apis',
+    banners: 'apis/banners',
 }
 
 const timeout = 30000
@@ -58,6 +59,10 @@ const list = () => {
     return GET(path.list)
 }
 
+const getBanners = () => {
+    return GET(path.banners)
+}
+
 const bookLocal = () => {
     return POST(path.book_local, {
         serviceId,
@@ -87,5 +92,6 @@ export default {
     getCollection,
     getPartner,
     apis,
-    add
+    add,
+    getBanners
 }
