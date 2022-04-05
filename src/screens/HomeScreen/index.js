@@ -56,6 +56,7 @@ export default class HomeScreen extends Component {
                 alert("Printer Connected")
             }).catch(() => {
                 console.error("cannot connect usb printer")
+                this.initPrinter()
             })
         }, 500)
 
@@ -99,9 +100,14 @@ export default class HomeScreen extends Component {
         this.printTicket(this.ticketNumber, { name: "Kham Benh" })
     }
 
+    onPrinterAttached = () => {
+        this.initPrinter()
+    }
+
     componentDidMount() {
         this.fetchData()
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
+        this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         // this.ws.addEventListener('open', (event) => {
         //     // socket.send('Hello Server!')
         //     console.log("Hello Server")
@@ -120,12 +126,12 @@ export default class HomeScreen extends Component {
         // this.ws.addEventListener('message', function (event) {
         //     console.log('Message from server ', event.data);
         // });
-
-
     }
     componentWillUnmount() {
         this.listenerKeyDown && this.listenerKeyDown.remove()
         this.listenerKeyDown = null
+        this.printerAttachedListener && this.printerAttachedListener.remove()
+        this.printerAttachedListener = null
     }
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {
