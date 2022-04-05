@@ -1,4 +1,4 @@
-import { size } from 'lodash'
+import { isString, size, split } from 'lodash'
 import React, { Component } from 'react'
 import {
     ActivityIndicator,
@@ -96,8 +96,23 @@ export default class HomeScreen extends Component {
         );
     }
 
-    onBarcodeScan = (payload) => {
-        this.printTicket(this.ticketNumber, { name: "Kham Benh" })
+    onBarcodeScan = async (payload) => {
+        if (!isString(payload)) return
+        const payloadArray = split(payload, ",")
+        if (size(payloadArray) !== 3) return
+        const userId = payloadArray[0]
+        const serviceId = payloadArray[1]
+        const ticketCode = Number(payloadArray[2])
+        const response = await ManagerApi.add({ lane: serviceId, userId, ticketCode })
+        if (response?.status === 200) {
+            const numberTicket = response?.data?.ticket?.number
+            this.setState({
+                message: `Number ticket: ${numberTicket}`,
+                showAlert: true
+            }, this.setTimeoutMessage)
+            this.printTicket(numberTicket, service)
+            this.setState({ isFetching: false })
+        }
     }
 
     onPrinterAttached = () => {
@@ -205,9 +220,8 @@ export default class HomeScreen extends Component {
     onPressServiceItem = async (service) => {
         this.setState({ isFetching: true })
         try {
-            const response = await ManagerApi.add(service._id)
+            const response = await ManagerApi.add({ lane: service._id })
             if (response?.status === 200) {
-                console.log("onPressServiceItem", response.data)
                 const numberTicket = response?.data?.ticket?.number
                 this.setState({
                     message: `Number ticket: ${numberTicket}`,

@@ -70,10 +70,8 @@ const bookLocal = () => {
     })
 }
 
-const add = (lane) => {
-    return POST(path.add, {
-        lane
-    })
+const add = (params) => {
+    return POST(path.add, params)
 }
 
 
