@@ -1,4 +1,4 @@
-import { isString, size, split } from 'lodash'
+import { find, isString, size, split } from 'lodash'
 import React, { Component } from 'react'
 import {
     ActivityIndicator,
@@ -100,9 +100,11 @@ export default class HomeScreen extends Component {
         if (!isString(payload)) return
         const payloadArray = split(payload, ",")
         if (size(payloadArray) !== 3) return
+        const { lanes } = this.state
         const userId = payloadArray[0]
         const serviceId = payloadArray[1]
         const ticketCode = Number(payloadArray[2])
+        const service = find(lanes, lane => lane._id === serviceId)
         const response = await ManagerApi.add({ lane: serviceId, userId, ticketCode })
         if (response?.status === 200) {
             const numberTicket = response?.data?.ticket?.number
