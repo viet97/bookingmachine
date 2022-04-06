@@ -13,6 +13,7 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
+import { SVG } from '../../../assets/svg'
 import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
 import { Colors } from '../../themes/Colors'
@@ -28,7 +29,8 @@ export default class HomeScreen extends Component {
         super(props)
         this.state = {
             isFetching: false,
-            lanes: null
+            lanes: null,
+            printerAttached: false
         }
         this.serviceItemWidth = (widthDevice - pixel(180)) / 2
         this.serviceItemHeight = pixel(280)
@@ -52,11 +54,10 @@ export default class HomeScreen extends Component {
         }
         setTimeout(() => {
             scanAndConnectUsbPrinter().then(() => {
-                this.setState({ printer: true })
+                this.setState({ printer: true, printerAttached: true })
                 alert("Printer Connected")
             }).catch(() => {
                 console.error("cannot connect usb printer")
-                this.initPrinter()
             })
         }, 500)
 
@@ -80,7 +81,6 @@ export default class HomeScreen extends Component {
 
     checkPrinter = () => {
         if (!this.state.printer) {
-            alert("No printer connected")
             this.initPrinter()
             return false
         }
@@ -88,7 +88,6 @@ export default class HomeScreen extends Component {
     }
 
     printTicket = (number, service) => {
-        if (!this.checkPrinter()) return
         return print(
             `[C]<b><font size='wide'>${stringToSlug(this.state.name)}</font></b>\n` +
             `[C]<b><font size='wide'>${stringToSlug(`${number}`)}</font></b>\n` +
@@ -100,6 +99,8 @@ export default class HomeScreen extends Component {
         if (!isString(payload)) return
         const payloadArray = split(payload, ",")
         if (size(payloadArray) !== 3) return
+        if (!this.checkPrinter()) return
+
         const { lanes } = this.state
         const userId = payloadArray[0]
         const serviceId = payloadArray[1]
@@ -118,13 +119,22 @@ export default class HomeScreen extends Component {
     }
 
     onPrinterAttached = () => {
+        console.log("onPrinterAttached")
+        this.setState({ printerAttached: true })
         this.initPrinter()
+    }
+
+    onPrinterDetached = () => {
+        console.log("onPrinterDetached")
+        closeConnect()
+        this.setState({ printer: false, printerAttached: false })
     }
 
     componentDidMount() {
         this.fetchData()
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
+        this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
         // this.ws.addEventListener('open', (event) => {
         //     // socket.send('Hello Server!')
         //     console.log("Hello Server")
@@ -149,6 +159,8 @@ export default class HomeScreen extends Component {
         this.listenerKeyDown = null
         this.printerAttachedListener && this.printerAttachedListener.remove()
         this.printerAttachedListener = null
+        this.printerDetachedListener && this.printerDetachedListener.remove()
+        this.printerDetachedListener = null
     }
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {
@@ -184,6 +196,7 @@ export default class HomeScreen extends Component {
     }
 
     renderHeader = () => {
+        const { printerAttached, printer } = this.state
         return <View
             style={styles.headerContainer}>
             {/* fake view to receive touch when scan barcode */}
@@ -216,10 +229,18 @@ export default class HomeScreen extends Component {
                     semiBold
                     style={styles.welcomeText}>{this.state.slogan}</Text>
             </View>
+            {printerAttached && !printer ? <Pressable
+                onPress={this.initPrinter}
+                hitSlop={16}
+                style={styles.printer}>
+                <SVG.printer width={24} height={24} color={'black'} />
+            </Pressable> : null}
         </View >
     }
 
     onPressServiceItem = async (service) => {
+        if (!this.checkPrinter()) return
+
         this.setState({ isFetching: true })
         try {
             const response = await ManagerApi.add({ lane: service._id })
@@ -333,6 +354,11 @@ export default class HomeScreen extends Component {
 
 
 const styles = StyleSheet.create({
+    printer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 32
+    },
     swiperContentContainer: {
         flex: 1,
         maxHeight: pixel(620),

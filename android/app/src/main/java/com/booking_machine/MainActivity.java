@@ -38,7 +38,6 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 public class MainActivity extends ReactActivity {
     private static final String TAG = "MainActivity";
     private static final String ACTION_USB_PERMISSION = "com.vidoctor.USB_PERMISSION";
-    String usbStateChangeAction = "android.hardware.usb.action.USB_STATE";
 
     private UsbManager usbManager;
     private UsbDevice usbDevice;
@@ -48,11 +47,17 @@ public class MainActivity extends ReactActivity {
     private final BroadcastReceiver usbDetect = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+
             if (action.equalsIgnoreCase(UsbManager.ACTION_USB_DEVICE_ATTACHED)){
                 sendEvent("onPrinterAttached",null);
+                return;
+            }
+            if (action.equalsIgnoreCase(UsbManager.ACTION_USB_DEVICE_DETACHED)){
+                sendEvent("onPrinterDetached",null);
             }
         }
     };
+
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -147,6 +152,7 @@ public class MainActivity extends ReactActivity {
         registerReceiver(this.usbReceiver, filter);
         IntentFilter usbDetectFilter = new IntentFilter();
         usbDetectFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        usbDetectFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(this.usbDetect, usbDetectFilter);
         instance = this;
     }
