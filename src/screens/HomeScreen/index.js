@@ -54,7 +54,7 @@ export default class HomeScreen extends Component {
         }
         setTimeout(() => {
             scanAndConnectUsbPrinter().then(() => {
-                this.setState({ printer: true, printerAttached: true })
+                this.setState({ printer: true })
                 alert("Printer Connected")
             }).catch(() => {
                 console.error("cannot connect usb printer")
@@ -119,15 +119,18 @@ export default class HomeScreen extends Component {
     }
 
     onPrinterAttached = () => {
-        console.log("onPrinterAttached")
         this.setState({ printerAttached: true })
         this.initPrinter()
     }
 
     onPrinterDetached = () => {
-        console.log("onPrinterDetached")
         closeConnect()
         this.setState({ printer: false, printerAttached: false })
+    }
+
+    alreadyAttachedPrinter = () => {
+        closeConnect()
+        this.setState({ printerAttached: true })
     }
 
     componentDidMount() {
@@ -135,6 +138,7 @@ export default class HomeScreen extends Component {
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
+        this.alreadyAttachedPrinter = DeviceEventEmitter.addListener('alreadyAttachedPrinter', this.alreadyAttachedPrinter);
         // this.ws.addEventListener('open', (event) => {
         //     // socket.send('Hello Server!')
         //     console.log("Hello Server")
@@ -161,6 +165,8 @@ export default class HomeScreen extends Component {
         this.printerAttachedListener = null
         this.printerDetachedListener && this.printerDetachedListener.remove()
         this.printerDetachedListener = null
+        this.alreadyAttachedPrinter && this.alreadyAttachedPrinter.remove()
+        this.alreadyAttachedPrinter = null
     }
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {

@@ -102,6 +102,8 @@ public class MainActivity extends ReactActivity {
         UsbConnection usbConnection = UsbPrintersConnections.selectFirstConnected(this);
         UsbManager usbManager = (UsbManager) this.getSystemService(Context.USB_SERVICE);
         if (usbConnection != null && usbManager != null) {
+            sendEvent("alreadyAttachedPrinter",null);
+
             PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(MainActivity.ACTION_USB_PERMISSION), 0);
             usbManager.requestPermission(usbConnection.getDevice(), permissionIntent);
             this.promise = promise;
