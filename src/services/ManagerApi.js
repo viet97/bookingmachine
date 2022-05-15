@@ -1,6 +1,6 @@
 import axios from "axios"
 import firestore from '@react-native-firebase/firestore';
-import { API_URL } from "@env"
+import { API_URL } from "../config/env"
 
 // const baseUrl = "https://videv-queue.casperpas.dev/api/v1/ticket/"
 const baseUrl = API_URL

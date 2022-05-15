@@ -9,8 +9,8 @@
     "test": "jest",
     "lint": "eslint .",
     "postinstall": "patch-package",
-    "start:stag": "APP_ENV=development yarn start --reset-cache",
-    "start:prod": "APP_ENV=production yarn start --reset-cache"
+    "env:stag": "node scripts/set-env.js stag",
+    "env:prod": "node scripts/set-env.js prod"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.15",
