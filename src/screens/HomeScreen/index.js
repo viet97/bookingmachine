@@ -7,11 +7,11 @@ import {
     StyleSheet,
     View,
     DeviceEventEmitter,
-    NativeModules
+    NativeModules,
+    Dimensions
 } from 'react-native'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
-import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
 import { SVG } from '../../../assets/svg'
 import Text from '../../components/Text'
@@ -44,6 +44,7 @@ export default class HomeScreen extends Component {
         this.ticketNumber = 1000
         // this.ws = new WebSocket("ws://192.168.31.89:3001")
     }
+
 
     initPrinter = async () => {
         try {
@@ -139,24 +140,6 @@ export default class HomeScreen extends Component {
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
         this.alreadyAttachedPrinter = DeviceEventEmitter.addListener('alreadyAttachedPrinter', this.alreadyAttachedPrinter);
-        // this.ws.addEventListener('open', (event) => {
-        //     // socket.send('Hello Server!')
-        //     console.log("Hello Server")
-        //     this.ws.send(JSON.stringify({
-        //         action: "add",
-        //         data: {
-        //             lane: "1"
-        //         }
-        //     }))
-        // });
-        // this.ws.addEventListener('close', e => {
-        //     console.log("disconnect", e)
-
-        // })
-        // // Listen for messages
-        // this.ws.addEventListener('message', function (event) {
-        //     console.log('Message from server ', event.data);
-        // });
     }
     componentWillUnmount() {
         this.listenerKeyDown && this.listenerKeyDown.remove()
@@ -226,10 +209,67 @@ export default class HomeScreen extends Component {
             </Pressable>
             <View
                 style={styles.headerInfo}>
-                <Text
-                    bold
-                    numberOfLines={2}
-                    style={styles.hospitalName}>{this.state.name}</Text>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center'
+                    }}>
+                    <Text
+                        bold
+                        numberOfLines={2}
+                        style={styles.hospitalName}>{this.state.name}</Text>
+                    <View
+                        style={{
+                            flexDirection: "row"
+                        }}>
+                        <Pressable
+                            hitSlop={16}
+                            style={{
+                                marginRight: 32
+                            }}>
+                            <SVG.printer_connected
+                                width={pixel(36)}
+                                height={pixel(36)} />
+                        </Pressable>
+                        <Pressable
+                            hitSlop={16}
+                            style={{
+                                marginRight: 32
+                            }}>
+                            <SVG.scanner_connected
+                                width={pixel(36)}
+                                height={pixel(36)} />
+                        </Pressable>
+                        <Pressable
+                            hitSlop={16}
+                            style={{
+                                marginRight: 32
+                            }}>
+                            <SVG.cloud_connected
+                                width={pixel(36)}
+                                height={pixel(36)} />
+                        </Pressable>
+                        <Pressable
+                            hitSlop={16}
+                            style={{
+                                marginRight: 32
+                            }}>
+                            <SVG.internet_connected
+                                width={pixel(36)}
+                                height={pixel(36)} />
+                        </Pressable>
+                        <Pressable
+                            hitSlop={16}
+                            style={{
+                                marginRight: 32
+                            }}>
+                            <SVG.power_connected
+                                width={pixel(36)}
+                                height={pixel(36)} />
+                        </Pressable>
+                    </View>
+                </View>
+
                 <Text
                     numberOfLines={2}
                     semiBold
@@ -266,14 +306,16 @@ export default class HomeScreen extends Component {
 
     }
 
-    renderItem = ({ item, index }) => {
+    renderItem = ({ item, index, width, height, margin, numColumns, rowColumns }) => {
         return (<ServiceItem
             disabled={this.state.isFetching}
             item={item}
             index={index}
-            serviceItemWidth={this.serviceItemWidth}
-            serviceItemHeight={this.serviceItemHeight}
-            serviceItemMargin={this.serviceItemMargin}
+            serviceItemWidth={width}
+            serviceItemHeight={height}
+            serviceItemMargin={margin}
+            numColumns={numColumns}
+            rowColumns={rowColumns}
             onPressServiceItem={() => this.onPressServiceItem(item)}
         />)
     }
@@ -281,16 +323,42 @@ export default class HomeScreen extends Component {
     renderServices = () => {
         const { lanes } = this.state
         if (!lanes) return null
-        return <View>
+        let numColumns, row
+        if (size(data) <= 4) {
+            numColumns = 2
+            row = 2
+        }
+        else if (size(data) <= 6) {
+            numColumns = 3
+            row = 2
+        } else if (size(data) <= 9) {
+            numColumns = 3
+            row = 3
+        }
+        else if (size(data) <= 12) {
+            numColumns = 4
+            row = 4
+        }
+        const itemMargin = pixel(24)
+        const listHeight = Dimensions.get("window").height - pixel(192)
+        const listWidth = Dimensions.get("window").width - pixel(64)
+        const itemWidth = (listWidth - itemMargin * (numColumns - 1)) / numColumns
+        const itemHeight = (listHeight - itemMargin * (row - 1)) / row
+        return <View
+            style={{
+                padding: pixel(32),
+                flex: 1,
+            }}>
             <FlatList
-                numColumns={2}
+                numColumns={numColumns}
                 data={lanes}
                 keyExtractor={(item, index) => `${item.id}${index}`}
-                renderItem={this.renderItem}
+                renderItem={({ item, index }) => this.renderItem({ item, index, width: itemWidth, height: itemHeight, margin: itemMargin, numColumns, rowColumns: row })}
                 showsVerticalScrollIndicator={false}
-                style={[styles.serviceList, {
-                    maxHeight: this.maxServiceListHeight
-                }]} />
+                contentContainerStyle={{
+                    flex: 1
+                }}
+                style={styles.serviceList} />
         </View>
 
     }
@@ -320,6 +388,41 @@ export default class HomeScreen extends Component {
             </View>)
     }
 
+    renderPrinting = () => {
+        return null
+        return (<View
+            style={{
+                backgroundColor: "#2368E8",
+                ...StyleSheet.absoluteFillObject,
+                alignItems: 'center',
+                justifyContent: "flex-end"
+            }}>
+            <Text
+                bold
+                style={{
+                    fontSize: pixel(96),
+                    lineHeight: pixel(144),
+                    letterSpacing: 0.5,
+                    textTransform: "uppercase",
+                    color: Colors.white
+                }}>
+                đang in vé...
+            </Text>
+            <Text
+                bold
+                style={{
+                    fontSize: pixel(64),
+                    lineHeight: pixel(112),
+                    letterSpacing: 0.5,
+                    textTransform: "uppercase",
+                    color: Colors.white,
+                }}>
+                nhận vé ở khe bên dưới
+            </Text>
+            <SVG.printing width={pixel(616)} />
+        </View>)
+    }
+
     render() {
         const { message, showAlert, lanes } = this.state
         if (!lanes) return <View
@@ -327,15 +430,19 @@ export default class HomeScreen extends Component {
             <ActivityIndicator size={"large"} />
         </View>
         return (
-            <LinearGradient
-                start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-                colors={[Colors.anti_flash, Colors.white]}
+            <View
                 style={styles.container}>
                 <View
                     style={styles.container}>
                     {this.renderHeader()}
-                    {this.renderServices()}
-                    {this.renderSwiper()}
+                    <View
+                        style={{
+                            flex: 1
+                        }}>
+                        {this.renderServices()}
+                        {this.renderSwiper()}
+                        {this.renderPrinting()}
+                    </View>
                 </View>
                 <AwesomeAlert
                     show={showAlert}
@@ -353,7 +460,7 @@ export default class HomeScreen extends Component {
                         this.setState({ showAlert: false })
                     }}
                 />
-            </LinearGradient>
+            </View>
         )
     }
 }
@@ -381,10 +488,9 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
+        backgroundColor: Colors.white,
     },
     serviceList: {
-        marginTop: pixel(90),
-        marginHorizontal: pixel(66),
     },
     serviceName: {
         color: Colors.white,
@@ -422,11 +528,12 @@ const styles = StyleSheet.create({
         fontSize: pixel(36),
         lineHeight: pixel(48.6),
         textTransform: 'uppercase',
-        letterSpacing: 0.05
+        letterSpacing: 0.05,
+        flex: 1
     },
     headerInfo: {
         marginLeft: pixel(24),
-        flex: 1
+        flex: 1,
     },
     logo: {
         width: pixel(158),
@@ -435,12 +542,7 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: "row",
         alignItems: 'center',
-        width: widthDevice,
-        backgroundColor: Colors.white,
-        borderBottomEndRadius: pixel(36),
-        borderBottomStartRadius: pixel(36),
-        paddingHorizontal: pixel(32),
-        paddingTop: pixel(22),
-        paddingBottom: pixel(30)
+        width: '100%',
+        paddingTop: pixel(32),
     },
 })

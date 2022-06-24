@@ -26,14 +26,15 @@ export default class ServiceItem extends Component {
     }
 
     render() {
-        const { item, index, serviceItemWidth, disabled, serviceItemMargin } = this.props
+        const { item, index, serviceItemWidth, serviceItemHeight, disabled, serviceItemMargin, rowColumns, numColumns } = this.props
         const { isLoading } = this.state
-        const isFirstColumn = index % 2 === 0
-        const isFirstRow = index <= 1
+        const isNotLastColumn = index % numColumns < numColumns - 1
+        const isFirstRow = index < numColumns
         const dynamicStyle = {
             marginTop: isFirstRow ? 0 : serviceItemMargin,
-            marginRight: isFirstColumn ? serviceItemMargin : 0,
+            marginRight: isNotLastColumn ? serviceItemMargin : 0,
             width: serviceItemWidth,
+            height: serviceItemHeight,
         }
         return (<Pressable
             disabled={isLoading || disabled}
@@ -79,7 +80,6 @@ const styles = StyleSheet.create({
     },
     serviceItem: {
         borderRadius: pixel(16),
-        height: pixel(280),
         overflow: 'hidden',
         alignItems: 'center',
         justifyContent: 'center'
