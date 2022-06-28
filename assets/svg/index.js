@@ -6,6 +6,7 @@ import power_connected from './power_connected.svg'
 import printer_connected from './printer_connected.svg'
 import printing from './printing.svg'
 import scanner_connected from './scanner_connected.svg'
+import right_arrow from './right_arrow.svg'
 
 export const SVG = {
     printer,
@@ -15,6 +16,7 @@ export const SVG = {
     power_connected,
     printer_connected,
     printing,
-    scanner_connected
+    scanner_connected,
+    right_arrow
 }
 

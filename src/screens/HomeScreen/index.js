@@ -1,4 +1,5 @@
 import { find, isString, size, split } from 'lodash'
+import AnimatedLottieView from 'lottie-react-native'
 import React, { Component } from 'react'
 import {
     ActivityIndicator,
@@ -8,11 +9,15 @@ import {
     View,
     DeviceEventEmitter,
     NativeModules,
-    Dimensions
+    Dimensions,
+    TouchableNativeFeedback,
+    TouchableWithoutFeedback
 } from 'react-native'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
+import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'
+import { Lottie } from '../../../assets/lottie'
 import { SVG } from '../../../assets/svg'
 import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
@@ -30,19 +35,30 @@ export default class HomeScreen extends Component {
         this.state = {
             isFetching: false,
             lanes: null,
-            printerAttached: false
+            printerAttached: false,
+            printing: false,
+            ads: false
         }
-        this.serviceItemWidth = (widthDevice - pixel(180)) / 2
-        this.serviceItemHeight = pixel(280)
-        this.maxServiceRow = 3
-        this.serviceItemMargin = pixel(48)
-        this.maxServiceListHeight = this.serviceItemHeight * this.maxServiceRow + this.serviceItemMargin * (this.maxServiceRow - 1)
         this.countPressLogo = 5
         this.currentCountPressLogo = 0
         this.countPressLogoTimeout = null
         this.timeoutCloseMessage = null
+        this.timeoutShowAds = null
         this.ticketNumber = 1000
-        // this.ws = new WebSocket("ws://192.168.31.89:3001")
+    }
+
+    removeTimeoutShowAds = () => {
+        if (this.timeoutShowAds) {
+            clearTimeout(this.timeoutShowAds)
+            this.timeoutShowAds = null
+        }
+    }
+
+    setTimeoutShowAds = () => {
+        this.removeTimeoutShowAds()
+        this.timeoutShowAds = setTimeout(() => {
+            this.setState({ ads: true })
+        }, 120000)
     }
 
 
@@ -78,6 +94,7 @@ export default class HomeScreen extends Component {
         }
 
         this.initPrinter()
+        this.setTimeoutShowAds()
     }
 
     checkPrinter = () => {
@@ -89,6 +106,8 @@ export default class HomeScreen extends Component {
     }
 
     printTicket = (number, service) => {
+        this.setState({ printing: true })
+        setTimeout(() => this.setState({ printing: false }), 2000)
         return print(
             `[C]<b><font size='wide'>${stringToSlug(this.state.name)}</font></b>\n` +
             `[C]<b><font size='wide'>${stringToSlug(`${number}`)}</font></b>\n` +
@@ -101,21 +120,21 @@ export default class HomeScreen extends Component {
         const payloadArray = split(payload, ",")
         if (size(payloadArray) !== 3) return
         if (!this.checkPrinter()) return
-
-        const { lanes } = this.state
-        const userId = payloadArray[0]
-        const serviceId = payloadArray[1]
-        const ticketCode = Number(payloadArray[2])
-        const service = find(lanes, lane => lane._id === serviceId)
-        const response = await ManagerApi.add({ lane: serviceId, userId, ticketCode })
-        if (response?.status === 200) {
-            const numberTicket = response?.data?.ticket?.number
-            this.setState({
-                message: `Number ticket: ${numberTicket}`,
-                showAlert: true
-            }, this.setTimeoutMessage)
-            this.printTicket(numberTicket, service)
-            this.setState({ isFetching: false })
+        this.setState({ ads: false }, this.setTimeoutShowAds)
+        try {
+            const { lanes } = this.state
+            const userId = payloadArray[0]
+            const serviceId = payloadArray[1]
+            const ticketCode = Number(payloadArray[2])
+            const service = find(lanes, lane => lane._id === serviceId)
+            const response = await ManagerApi.add({ lane: serviceId, userId, ticketCode })
+            if (response?.status === 200) {
+                const numberTicket = response?.data?.ticket?.number
+                this.printTicket(numberTicket, service)
+                this.setState({ isFetching: false })
+            }
+        } catch (e) {
+            console.error("onBarcodeScan Error", e)
         }
     }
 
@@ -216,7 +235,7 @@ export default class HomeScreen extends Component {
                     }}>
                     <Text
                         bold
-                        numberOfLines={2}
+                        numberOfLines={1}
                         style={styles.hospitalName}>{this.state.name}</Text>
                     <View
                         style={{
@@ -224,6 +243,9 @@ export default class HomeScreen extends Component {
                         }}>
                         <Pressable
                             hitSlop={16}
+                            onPress={() => {
+                                this.setState({ ads: false }, this.setTimeoutShowAds)
+                            }}
                             style={{
                                 marginRight: 32
                             }}>
@@ -232,6 +254,9 @@ export default class HomeScreen extends Component {
                                 height={pixel(36)} />
                         </Pressable>
                         <Pressable
+                            onPress={() => {
+                                this.setState({ ads: false }, this.setTimeoutShowAds)
+                            }}
                             hitSlop={16}
                             style={{
                                 marginRight: 32
@@ -241,6 +266,9 @@ export default class HomeScreen extends Component {
                                 height={pixel(36)} />
                         </Pressable>
                         <Pressable
+                            onPress={() => {
+                                this.setState({ ads: false }, this.setTimeoutShowAds)
+                            }}
                             hitSlop={16}
                             style={{
                                 marginRight: 32
@@ -250,6 +278,9 @@ export default class HomeScreen extends Component {
                                 height={pixel(36)} />
                         </Pressable>
                         <Pressable
+                            onPress={() => {
+                                this.setState({ ads: false }, this.setTimeoutShowAds)
+                            }}
                             hitSlop={16}
                             style={{
                                 marginRight: 32
@@ -259,10 +290,10 @@ export default class HomeScreen extends Component {
                                 height={pixel(36)} />
                         </Pressable>
                         <Pressable
-                            hitSlop={16}
-                            style={{
-                                marginRight: 32
-                            }}>
+                            onPress={() => {
+                                this.setState({ ads: false }, this.setTimeoutShowAds)
+                            }}
+                            hitSlop={16}>
                             <SVG.power_connected
                                 width={pixel(36)}
                                 height={pixel(36)} />
@@ -286,16 +317,12 @@ export default class HomeScreen extends Component {
 
     onPressServiceItem = async (service) => {
         if (!this.checkPrinter()) return
-
+        this.setTimeoutShowAds()
         this.setState({ isFetching: true })
         try {
             const response = await ManagerApi.add({ lane: service._id })
             if (response?.status === 200) {
                 const numberTicket = response?.data?.ticket?.number
-                this.setState({
-                    message: `Number ticket: ${numberTicket}`,
-                    showAlert: true
-                }, this.setTimeoutMessage)
                 this.printTicket(numberTicket, service)
                 this.setState({ isFetching: false })
             }
@@ -324,18 +351,18 @@ export default class HomeScreen extends Component {
         const { lanes } = this.state
         if (!lanes) return null
         let numColumns, row
-        if (size(data) <= 4) {
+        if (size(lanes) <= 4) {
             numColumns = 2
             row = 2
         }
-        else if (size(data) <= 6) {
+        else if (size(lanes) <= 6) {
             numColumns = 3
             row = 2
-        } else if (size(data) <= 9) {
+        } else if (size(lanes) <= 9) {
             numColumns = 3
             row = 3
         }
-        else if (size(data) <= 12) {
+        else if (size(lanes) <= 12) {
             numColumns = 4
             row = 4
         }
@@ -364,32 +391,50 @@ export default class HomeScreen extends Component {
     }
 
     renderSwiper = () => {
-        if (!this.state.banner) return null
+        if (!this.state.banner || !this.state.ads) return null
         return (
-            <View
-                style={styles.swiperContainer}>
+            <TouchableNativeFeedback
+                onPress={() => this.setState({ ads: false }, this.setTimeoutShowAds)}>
                 <View
-                    style={styles.swiperContentContainer}>
-                    <Swiper
-                        showsPagination={false}
-                        autoplay
-                        removeClippedSubviews={false}
-                        autoplayTimeout={5}
-                        loop>
-                        {this.state.banner?.map((uri) => {
-                            return <FastImage
-                                key={`${uri}`}
-                                resizeMode={'cover'}
-                                source={{ uri: resolveImagePath(uri) }}
-                                style={{ flex: 1 }} />
-                        })}
-                    </Swiper>
+                    style={styles.swiperContainer}>
+                    <View
+                        style={styles.swiperContentContainer}>
+                        <Swiper
+                            showsPagination={false}
+                            autoplay
+                            removeClippedSubviews={false}
+                            autoplayTimeout={5}
+                            loop>
+                            {this.state.banner?.map((uri) => {
+                                return <FastImage
+                                    key={`${uri}`}
+                                    resizeMode={'cover'}
+                                    source={{ uri: resolveImagePath(uri) }}
+                                    style={{ flex: 1 }} />
+                            })}
+                        </Swiper>
+                    </View>
+                    <LinearGradient colors={[
+                        'rgba(35, 104, 232, 1)',
+                        'rgba(35, 104, 232, 0.9)',
+                        'rgba(35, 104, 232, 0)']}
+                        locations={[0, 0.5, 1]}
+                        start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }}
+                        style={styles.linear}>
+                        <Text
+                            bold
+                            style={styles.pressToOrder}>
+                            Bấm để chọn vé khám
+                        </Text>
+
+                        <SVG.right_arrow width={pixel(84)} height={pixel(84)} />
+                    </LinearGradient>
                 </View>
-            </View>)
+            </TouchableNativeFeedback>)
     }
 
     renderPrinting = () => {
-        return null
+        if (!this.state.printing) return null
         return (<View
             style={{
                 backgroundColor: "#2368E8",
@@ -399,27 +444,19 @@ export default class HomeScreen extends Component {
             }}>
             <Text
                 bold
-                style={{
-                    fontSize: pixel(96),
-                    lineHeight: pixel(144),
-                    letterSpacing: 0.5,
-                    textTransform: "uppercase",
-                    color: Colors.white
-                }}>
+                style={styles.printing}>
                 đang in vé...
             </Text>
             <Text
                 bold
-                style={{
-                    fontSize: pixel(64),
-                    lineHeight: pixel(112),
-                    letterSpacing: 0.5,
-                    textTransform: "uppercase",
-                    color: Colors.white,
-                }}>
+                style={styles.printingDes}>
                 nhận vé ở khe bên dưới
             </Text>
-            <SVG.printing width={pixel(616)} />
+            <AnimatedLottieView
+                style={styles.printingLottie}
+                loop
+                autoPlay
+                source={Lottie.printing} />
         </View>)
     }
 
@@ -430,8 +467,8 @@ export default class HomeScreen extends Component {
             <ActivityIndicator size={"large"} />
         </View>
         return (
-            <View
-                style={styles.container}>
+            <TouchableWithoutFeedback
+                onPress={() => this.setState({ ads: false }, this.setTimeoutShowAds)}>
                 <View
                     style={styles.container}>
                     {this.renderHeader()}
@@ -440,11 +477,11 @@ export default class HomeScreen extends Component {
                             flex: 1
                         }}>
                         {this.renderServices()}
-                        {this.renderSwiper()}
                         {this.renderPrinting()}
+                        {this.renderSwiper()}
                     </View>
-                </View>
-                <AwesomeAlert
+
+                    {/* <AwesomeAlert
                     show={showAlert}
                     showProgress={false}
                     message={message}
@@ -459,14 +496,50 @@ export default class HomeScreen extends Component {
                     onConfirmPressed={() => {
                         this.setState({ showAlert: false })
                     }}
-                />
-            </View>
+                /> */}
+                </View>
+            </TouchableWithoutFeedback>
         )
     }
 }
 
 
 const styles = StyleSheet.create({
+    pressToOrder: {
+        fontSize: pixel(40),
+        letterSpacing: 0.5,
+        color: Colors.white,
+        textTransform: "uppercase"
+    },
+    linear: {
+        flexDirection: "row",
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        paddingVertical: pixel(40),
+        paddingLeft: pixel(40),
+        alignItems: 'center',
+        width: pixel(900)
+    },
+    printingLottie: {
+        width: pixel(616),
+        height: pixel(523),
+        marginBottom: -pixel(120)
+    },
+    printingDes: {
+        fontSize: pixel(64),
+        lineHeight: pixel(112),
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+        color: Colors.white,
+    },
+    printing: {
+        fontSize: pixel(96),
+        lineHeight: pixel(144),
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+        color: Colors.white
+    },
     printer: {
         position: 'absolute',
         bottom: 0,
@@ -474,7 +547,6 @@ const styles = StyleSheet.create({
     },
     swiperContentContainer: {
         flex: 1,
-        maxHeight: pixel(620),
     },
     containerLoading: {
         flex: 1,
@@ -482,9 +554,7 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     swiperContainer: {
-        marginTop: pixel(88),
-        flex: 1,
-        justifyContent: 'flex-end'
+        ...StyleSheet.absoluteFillObject
     },
     container: {
         flex: 1,
@@ -505,21 +575,15 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         backgroundColor: Colors.kon_75
     },
-    serviceBg: {
-        position: 'absolute',
-        ...StyleSheet.absoluteFillObject,
-        height: pixel(280),
-    },
     serviceItem: {
         borderRadius: pixel(16),
-        height: pixel(280),
         overflow: 'hidden',
         alignItems: 'center',
         justifyContent: 'center'
     },
     welcomeText: {
         color: Colors.navy_blue,
-        marginTop: pixel(6),
+        marginTop: pixel(4),
         fontSize: pixel(32),
         lineHeight: pixel(44.8),
     },
@@ -529,7 +593,8 @@ const styles = StyleSheet.create({
         lineHeight: pixel(48.6),
         textTransform: 'uppercase',
         letterSpacing: 0.05,
-        flex: 1
+        flex: 1,
+        marginRight: 24
     },
     headerInfo: {
         marginLeft: pixel(24),
@@ -543,6 +608,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         width: '100%',
-        paddingTop: pixel(32),
+        paddingHorizontal: pixel(32),
     },
 })

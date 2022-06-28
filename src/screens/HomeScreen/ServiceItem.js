@@ -36,6 +36,7 @@ export default class ServiceItem extends Component {
             width: serviceItemWidth,
             height: serviceItemHeight,
         }
+
         return (<Pressable
             disabled={isLoading || disabled}
             onPress={this.onPressService}
@@ -45,7 +46,9 @@ export default class ServiceItem extends Component {
                 source={{ uri: resolveImagePath(item.cover) }}
                 style={[styles.serviceBg, { width: serviceItemWidth }]} />
             <View
-                style={styles.serviceItemOverlay} />
+                style={[styles.serviceItemOverlay, {
+                    backgroundColor: isLoading ? "rgba(35, 94, 231, 0.95)" : Colors.kon_75
+                }]} />
             {isLoading ?
                 <ActivityIndicator
                     color={Colors.white}
