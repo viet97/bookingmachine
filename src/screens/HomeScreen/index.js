@@ -26,6 +26,7 @@ import { pixel, widthDevice } from '../../utils/DeviceUtil'
 import { resolveImagePath } from '../../utils/ImageUtil'
 import { stringToSlug } from '../../utils/StringUtils'
 import ServiceItem from './ServiceItem'
+import NetInfo from "@react-native-community/netinfo";
 
 const { closeKiosMode, clearDeviceOwner, closeConnect, scanAndConnectUsbPrinter, print } = NativeModules.AndroidUtils
 
@@ -36,6 +37,8 @@ export default class HomeScreen extends Component {
             isFetching: false,
             lanes: null,
             printerAttached: false,
+            barcodeAttached: false,
+            networkConnected: false,
             printing: false,
             ads: false
         }
@@ -44,7 +47,6 @@ export default class HomeScreen extends Component {
         this.countPressLogoTimeout = null
         this.timeoutCloseMessage = null
         this.timeoutShowAds = null
-        this.ticketNumber = 1000
     }
 
     removeTimeoutShowAds = () => {
@@ -153,12 +155,17 @@ export default class HomeScreen extends Component {
         this.setState({ printerAttached: true })
     }
 
+    onNetworkChange = state => {
+        this.setState({ networkConnected: state.isConnected })
+    }
+
     componentDidMount() {
         this.fetchData()
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
         this.alreadyAttachedPrinter = DeviceEventEmitter.addListener('alreadyAttachedPrinter', this.alreadyAttachedPrinter);
+        this.networkListener = NetInfo.addEventListener(this.onNetworkChange);
     }
     componentWillUnmount() {
         this.listenerKeyDown && this.listenerKeyDown.remove()
@@ -169,6 +176,8 @@ export default class HomeScreen extends Component {
         this.printerDetachedListener = null
         this.alreadyAttachedPrinter && this.alreadyAttachedPrinter.remove()
         this.alreadyAttachedPrinter = null
+        this.networkListener && this.networkListener()
+        this.networkListener = null
     }
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {
@@ -204,7 +213,7 @@ export default class HomeScreen extends Component {
     }
 
     renderHeader = () => {
-        const { printerAttached, printer } = this.state
+        const { printerAttached, printer, networkConnected } = this.state
         return <View
             style={styles.headerContainer}>
             {/* fake view to receive touch when scan barcode */}
@@ -245,9 +254,11 @@ export default class HomeScreen extends Component {
                             hitSlop={16}
                             onPress={() => {
                                 this.setState({ ads: false }, this.setTimeoutShowAds)
+                                this.initPrinter()
                             }}
                             style={{
-                                marginRight: 32
+                                marginRight: 32,
+                                opacity: printer ? 1 : 0.1
                             }}>
                             <SVG.printer_connected
                                 width={pixel(36)}
@@ -265,7 +276,7 @@ export default class HomeScreen extends Component {
                                 width={pixel(36)}
                                 height={pixel(36)} />
                         </Pressable>
-                        <Pressable
+                        {/* <Pressable
                             onPress={() => {
                                 this.setState({ ads: false }, this.setTimeoutShowAds)
                             }}
@@ -276,20 +287,21 @@ export default class HomeScreen extends Component {
                             <SVG.cloud_connected
                                 width={pixel(36)}
                                 height={pixel(36)} />
-                        </Pressable>
+                        </Pressable> */}
                         <Pressable
                             onPress={() => {
                                 this.setState({ ads: false }, this.setTimeoutShowAds)
                             }}
                             hitSlop={16}
                             style={{
-                                marginRight: 32
-                            }}>
+                                opacity: networkConnected ? 1 : 0.1
+                            }}
+                        >
                             <SVG.internet_connected
                                 width={pixel(36)}
                                 height={pixel(36)} />
                         </Pressable>
-                        <Pressable
+                        {/* <Pressable
                             onPress={() => {
                                 this.setState({ ads: false }, this.setTimeoutShowAds)
                             }}
@@ -297,7 +309,7 @@ export default class HomeScreen extends Component {
                             <SVG.power_connected
                                 width={pixel(36)}
                                 height={pixel(36)} />
-                        </Pressable>
+                        </Pressable> */}
                     </View>
                 </View>
 
@@ -306,12 +318,6 @@ export default class HomeScreen extends Component {
                     semiBold
                     style={styles.welcomeText}>{this.state.slogan}</Text>
             </View>
-            {printerAttached && !printer ? <Pressable
-                onPress={this.initPrinter}
-                hitSlop={16}
-                style={styles.printer}>
-                <SVG.printer width={24} height={24} color={'black'} />
-            </Pressable> : null}
         </View >
     }
 
