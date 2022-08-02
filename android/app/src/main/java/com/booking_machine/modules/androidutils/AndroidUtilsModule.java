@@ -2,6 +2,7 @@ package com.booking_machine.modules.androidutils;
 
 import androidx.annotation.Nullable;
 
+import com.booking_machine.MainActivity;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -56,6 +57,16 @@ public class AndroidUtilsModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void scanAndConnectUsbPrinter(Promise promise) {
         AndroidUtilsManager.getInstance().scanAndConnect(promise);
+    }
+
+    @ReactMethod
+    public void downLoadFileFromUrl(String name, String url,String checkSum, Promise promise) {
+        MainActivity.getInstance().downLoadFileFromUrl(name,url,checkSum);
+    }
+
+    @ReactMethod
+    public void downLoadServiceFileFromUrl(String name, String url,String checkSum, Promise promise) {
+        MainActivity.getInstance().downLoadServiceFileFromUrl(name,url,checkSum);
     }
 }
 

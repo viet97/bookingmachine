@@ -22,13 +22,16 @@ import { SVG } from '../../../assets/svg'
 import Text from '../../components/Text'
 import ManagerApi from '../../services/ManagerApi'
 import { Colors } from '../../themes/Colors'
-import { pixel, widthDevice } from '../../utils/DeviceUtil'
+import { pixel } from '../../utils/DeviceUtil'
 import { resolveImagePath } from '../../utils/ImageUtil'
 import { stringToSlug } from '../../utils/StringUtils'
 import ServiceItem from './ServiceItem'
 import NetInfo from "@react-native-community/netinfo";
-
-const { closeKiosMode, clearDeviceOwner, closeConnect, scanAndConnectUsbPrinter, print } = NativeModules.AndroidUtils
+import { firebase } from '@react-native-firebase/database';
+import deviceInfo from "react-native-device-info"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+const { closeKiosMode, clearDeviceOwner, closeConnect, scanAndConnectUsbPrinter, print, downLoadFileFromUrl, downLoadServiceFileFromUrl } = NativeModules.AndroidUtils
+import { FB_DB_URL } from "../../config/env"
 
 export default class HomeScreen extends Component {
     constructor(props) {
@@ -161,11 +164,37 @@ export default class HomeScreen extends Component {
 
     componentDidMount() {
         this.fetchData()
+        // clearDeviceOwner()
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
         this.alreadyAttachedPrinter = DeviceEventEmitter.addListener('alreadyAttachedPrinter', this.alreadyAttachedPrinter);
         this.networkListener = NetInfo.addEventListener(this.onNetworkChange);
+        this.dbServiceReference = firebase.app().database(FB_DB_URL).ref('/versions/gate_service');
+        this.dbUiReference = firebase.app().database(FB_DB_URL).ref('/versions/gate_ui');
+        this.dbServiceReference.on("value", async snapshot => {
+            const data = snapshot && snapshot.val()
+            const build_number = data?.build_number
+            const url = data?.url
+            const check_sum = data?.check_sum
+
+            const currentServiceBuildNumber = await AsyncStorage.getItem("serviceVersion") || 1
+            if (build_number <= 1 || !url || (currentServiceBuildNumber && Number(currentServiceBuildNumber) >= build_number)) {
+                return
+            }
+            AsyncStorage.setItem("serviceVersion", `${build_number}`)
+            downLoadServiceFileFromUrl(`gate_service_${build_number}.apk`, url, check_sum)
+        })
+        this.dbUiReference.on("value", snapshot => {
+            const data = snapshot && snapshot.val()
+            const build_number = data?.build_number
+            const url = data?.url
+            const check_sum = data?.check_sum
+            if (!build_number || !url || build_number <= deviceInfo.getBuildNumber()) {
+                return
+            }
+            downLoadFileFromUrl(`gate_ui_${build_number}.apk`, url, check_sum)
+        })
     }
     componentWillUnmount() {
         this.listenerKeyDown && this.listenerKeyDown.remove()
@@ -178,6 +207,10 @@ export default class HomeScreen extends Component {
         this.alreadyAttachedPrinter = null
         this.networkListener && this.networkListener()
         this.networkListener = null
+        this.dbUiReference && this.dbUiReference.remove()
+        this.dbUiReference = null
+        this.dbServiceReference && this.dbServiceReference.remove()
+        this.dbServiceReference = null
     }
     clearTimeoutLogoPress = () => {
         if (this.countPressLogoTimeout) {
@@ -203,7 +236,6 @@ export default class HomeScreen extends Component {
         this.clearTimeoutLogoPress()
         this.currentCountPressLogo++
         if (this.currentCountPressLogo >= this.countPressLogo) {
-            this.initPrinter()
             this.currentCountPressLogo = 0;
             this.clearTimeoutLogoPress()
         }
@@ -264,7 +296,7 @@ export default class HomeScreen extends Component {
                                 width={pixel(36)}
                                 height={pixel(36)} />
                         </Pressable>
-                        <Pressable
+                        {/* <Pressable
                             onPress={() => {
                                 this.setState({ ads: false }, this.setTimeoutShowAds)
                             }}
@@ -275,7 +307,7 @@ export default class HomeScreen extends Component {
                             <SVG.scanner_connected
                                 width={pixel(36)}
                                 height={pixel(36)} />
-                        </Pressable>
+                        </Pressable> */}
                         {/* <Pressable
                             onPress={() => {
                                 this.setState({ ads: false }, this.setTimeoutShowAds)
@@ -467,7 +499,7 @@ export default class HomeScreen extends Component {
     }
 
     render() {
-        const { message, showAlert, lanes } = this.state
+        const { lanes } = this.state
         if (!lanes) return <View
             style={styles.containerLoading}>
             <ActivityIndicator size={"large"} />
