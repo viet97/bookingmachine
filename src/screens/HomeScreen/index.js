@@ -169,6 +169,7 @@ export default class HomeScreen extends Component {
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
         this.alreadyAttachedPrinter = DeviceEventEmitter.addListener('alreadyAttachedPrinter', this.alreadyAttachedPrinter);
+        this.onServiceUpdatedListener = DeviceEventEmitter.addListener('serviceUpdated', this.fetchData);
         this.networkListener = NetInfo.addEventListener(this.onNetworkChange);
         this.dbServiceReference = firebase.app().database(FB_DB_URL).ref('/versions/gate_service');
         this.dbUiReference = firebase.app().database(FB_DB_URL).ref('/versions/gate_ui');
@@ -205,6 +206,8 @@ export default class HomeScreen extends Component {
         this.printerDetachedListener = null
         this.alreadyAttachedPrinter && this.alreadyAttachedPrinter.remove()
         this.alreadyAttachedPrinter = null
+        this.onServiceUpdatedListener && this.onServiceUpdatedListener.remove()
+        this.onServiceUpdatedListener = null
         this.networkListener && this.networkListener()
         this.networkListener = null
         this.dbUiReference && this.dbUiReference.remove()

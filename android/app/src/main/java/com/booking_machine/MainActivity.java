@@ -201,6 +201,7 @@ public class MainActivity extends ReactActivity {
         registerReceiver(this.usbDetect, usbDetectFilter);
         registerReceiver(downloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         registerReceiver(serviceDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(onServiceUpdate,new IntentFilter("com.vidoctor.gate.SERVICE_LAUNCHED"));
 
         instance = this;
         if(!hasPermissions(this.PERMISSIONS)){
@@ -223,6 +224,16 @@ public class MainActivity extends ReactActivity {
             }
         }
     }
+
+    private final BroadcastReceiver onServiceUpdate = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            long versionCode = intent.getIntExtra("versionCode", 1);
+            Log.d(TAG, "onServiceUpdate: " + versionCode);
+            if(versionCode > BuildConfig.VERSION_CODE){
+                    sendEvent("serviceUpdated",null);
+            }
+        }
+    };
 
     private final BroadcastReceiver downloadComplete = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
