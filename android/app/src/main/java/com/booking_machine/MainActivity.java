@@ -229,9 +229,9 @@ public class MainActivity extends ReactActivity {
         public void onReceive(Context context, Intent intent) {
             long versionCode = intent.getIntExtra("versionCode", 1);
             Log.d(TAG, "onServiceUpdate: " + versionCode);
-            if(versionCode > BuildConfig.VERSION_CODE){
+           if(versionCode > BuildConfig.VERSION_CODE){
                     sendEvent("serviceUpdated",null);
-            }
+           }
         }
     };
 
@@ -476,7 +476,7 @@ public class MainActivity extends ReactActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        enableLockMode();
+        enableLockMode();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
