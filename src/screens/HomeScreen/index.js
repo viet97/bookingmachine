@@ -13,7 +13,6 @@ import {
     TouchableNativeFeedback,
     TouchableWithoutFeedback
 } from 'react-native'
-import AwesomeAlert from 'react-native-awesome-alerts'
 import FastImage from 'react-native-fast-image'
 import LinearGradient from 'react-native-linear-gradient'
 import Swiper from 'react-native-swiper'

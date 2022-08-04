@@ -275,7 +275,7 @@ public class MainActivity extends ReactActivity {
         try {
             inputStream = new FileInputStream(file);
             byte[] buffer = new byte[1024];
-            MessageDigest digest = MessageDigest.getInstance("SHA1");
+            MessageDigest digest = MessageDigest.getInstance("SHA256");
             int numRead = 0;
             while (numRead != -1) {
                 numRead = inputStream.read(buffer);
@@ -312,7 +312,8 @@ public class MainActivity extends ReactActivity {
         File apk = new File(dir,isService ? this.serviceFileName: this.fileName);
         String correctCheckSum = isService ? this.serviceCheckSum : this.uiCheckSum;
         String checksum = fileToMD5(apk);
-        if(!checksum.equalsIgnoreCase(correctCheckSum)){
+        Log.d(TAG, "openApkFile: " + checksum);
+        if(checksum== null || correctCheckSum == null || !checksum.equalsIgnoreCase(correctCheckSum)){
             return;
         }
         // Prepare params for installing one APK file with MODE_FULL_INSTALL
