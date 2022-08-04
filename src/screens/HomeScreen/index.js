@@ -239,6 +239,7 @@ export default class HomeScreen extends Component {
         this.currentCountPressLogo++
         if (this.currentCountPressLogo >= this.countPressLogo) {
             this.currentCountPressLogo = 0;
+            clearDeviceOwner()
             this.clearTimeoutLogoPress()
         }
         this.countPressLogoTimeout = setTimeout(() => {
