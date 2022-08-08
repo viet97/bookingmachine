@@ -122,13 +122,13 @@ export default class HomeScreen extends Component {
     onBarcodeScan = async (payload) => {
         if (!isString(payload)) return
         const payloadArray = split(payload, ",")
-        if (size(payloadArray) !== 3) return
+        if (size(payloadArray) < 4) return
         if (!this.checkPrinter()) return
         this.setState({ ads: false }, this.setTimeoutShowAds)
         try {
             const { lanes } = this.state
             const userId = payloadArray[0]
-            const serviceId = payloadArray[1]
+            const serviceId = payloadArray[3]
             const ticketCode = Number(payloadArray[2])
             const service = find(lanes, lane => lane._id === serviceId)
             const response = await ManagerApi.add({ lane: serviceId, userId, ticketCode })
