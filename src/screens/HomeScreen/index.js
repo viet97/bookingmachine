@@ -29,7 +29,14 @@ import NetInfo from "@react-native-community/netinfo";
 import { firebase } from '@react-native-firebase/database';
 import deviceInfo from "react-native-device-info"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-const { closeKiosMode, clearDeviceOwner, closeConnect, scanAndConnectUsbPrinter, print, downLoadFileFromUrl, downLoadServiceFileFromUrl } = NativeModules.AndroidUtils
+const { closeKiosMode,
+    clearDeviceOwner,
+    closeConnect,
+    scanAndConnectUsbPrinter,
+    print,
+    downLoadFileFromUrl,
+    downLoadServiceFileFromUrl,
+    startLockMode } = NativeModules.AndroidUtils
 import { FB_DB_URL } from "../../config/env"
 
 export default class HomeScreen extends Component {
@@ -89,6 +96,7 @@ export default class HomeScreen extends Component {
         if (size(arrayResponse) && arrayResponse[0].data) {
             const { lanes, tickets, slogan, logo, name } = arrayResponse[0].data
             this.setState({ lanes, tickets, slogan, logo, name })
+            startLockMode()
         }
         if (size(arrayResponse) >= 2 && arrayResponse[1].data) {
             const { fromHost, fromPartner } = arrayResponse[1].data

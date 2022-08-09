@@ -70,6 +70,8 @@ public class MainActivity extends ReactActivity {
     int PERMISSION_ALL = 1;
     private String fileName;
     private String serviceFileName;
+    private boolean canLock = false;
+
     String[] PERMISSIONS = {
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -223,6 +225,12 @@ public class MainActivity extends ReactActivity {
                 }
             }
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void startLockMode(){
+        this.canLock = true;
+        enableLockMode();
     }
 
     private final BroadcastReceiver onServiceUpdate = new BroadcastReceiver() {
@@ -385,7 +393,7 @@ public class MainActivity extends ReactActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void enableLockMode() {
         setupDPM();
-        if (dpm == null || !dpm.isDeviceOwnerApp(getPackageName())) return;
+        if (dpm == null || !dpm.isDeviceOwnerApp(getPackageName()) || !canLock) return;
         dpm.setLockTaskPackages(adminName, new String[]{getPackageName(), "com.android.systemui"});
         if (dpm.isLockTaskPermitted(getPackageName())) {
             startLockTask();
