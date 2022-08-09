@@ -68,5 +68,10 @@ public class AndroidUtilsModule extends ReactContextBaseJavaModule {
     public void downLoadServiceFileFromUrl(String name, String url,String checkSum, Promise promise) {
         MainActivity.getInstance().downLoadServiceFileFromUrl(name,url,checkSum);
     }
+
+    @ReactMethod
+    public void startLockMode() {
+        MainActivity.getInstance().startLockMode();
+    }
 }
 
