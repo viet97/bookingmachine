@@ -177,6 +177,9 @@ export default class HomeScreen extends Component {
     componentDidMount() {
         this.fetchData()
         // clearDeviceOwner()
+        // setTimeout(() => {
+        //     this.onBarcodeScan("DVNLgibGDtgWEp2rJL10UaIWyQm1,i6nUo4pFpteCN0r8r9QZ,91,WXZLX0hu3yfVRkLODXPN")
+        // }, 3000);
         this.listenerKeyDown = DeviceEventEmitter.addListener('onBarcodeScan', this.onBarcodeScan);
         this.printerAttachedListener = DeviceEventEmitter.addListener('onPrinterAttached', this.onPrinterAttached);
         this.printerDetachedListener = DeviceEventEmitter.addListener('onPrinterDetached', this.onPrinterDetached);
