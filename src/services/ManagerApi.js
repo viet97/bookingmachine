@@ -70,11 +70,18 @@ const bookLocal = () => {
     })
 }
 
+const checkin = ({ partnerId, userId, lane, ticket }) => {
+    return POST(path.check_in, {
+        partnerId,
+        userId,
+        lane,
+        ticket
+    })
+}
+
 const add = (params) => {
     return POST(path.add, params)
 }
-
-
 
 const getCollection = (name) => {
     return firestore().collection(name)
@@ -91,5 +98,6 @@ export default {
     getPartner,
     apis,
     add,
-    getBanners
+    getBanners,
+    checkin
 }

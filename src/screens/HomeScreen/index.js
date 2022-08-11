@@ -136,14 +136,19 @@ export default class HomeScreen extends Component {
         try {
             const { lanes } = this.state
             const userId = payloadArray[0]
+            const partnerId = payloadArray[1]
             const serviceId = payloadArray[3]
-            const ticketCode = Number(payloadArray[2])
+            const ticket = Number(payloadArray[2])
             const service = find(lanes, lane => lane._id === serviceId)
-            const response = await ManagerApi.add({ lane: serviceId, userId, ticketCode })
+            const response = await ManagerApi.checkin({ lane: serviceId, userId, ticket, partnerId })
             if (response?.status === 200) {
                 const numberTicket = response?.data?.ticket?.number
                 this.printTicket(numberTicket, service)
                 this.setState({ isFetching: false })
+                return
+            }
+            if (response?.message) {
+                alert(response?.message)
             }
         } catch (e) {
             console.error("onBarcodeScan Error", e)
