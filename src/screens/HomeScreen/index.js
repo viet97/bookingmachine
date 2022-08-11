@@ -36,7 +36,9 @@ const { closeKiosMode,
     print,
     downLoadFileFromUrl,
     downLoadServiceFileFromUrl,
-    startLockMode } = NativeModules.AndroidUtils
+    startLockMode,
+    showToast
+} = NativeModules.AndroidUtils
 import { FB_DB_URL } from "../../config/env"
 
 export default class HomeScreen extends Component {
@@ -148,7 +150,7 @@ export default class HomeScreen extends Component {
                 return
             }
             if (response?.message) {
-                alert(response?.message)
+                showToast(response.message)
             }
         } catch (e) {
             console.error("onBarcodeScan Error", e)

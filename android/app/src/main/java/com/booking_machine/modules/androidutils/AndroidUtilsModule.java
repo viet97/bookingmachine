@@ -1,5 +1,7 @@
 package com.booking_machine.modules.androidutils;
 
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 
 import com.booking_machine.MainActivity;
@@ -72,6 +74,11 @@ public class AndroidUtilsModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startLockMode() {
         MainActivity.getInstance().startLockMode();
+    }
+
+    @ReactMethod
+    public void showToast(String message) {
+        Toast.makeText(MainActivity.getInstance(), message, Toast.LENGTH_LONG).show();
     }
 }
 
