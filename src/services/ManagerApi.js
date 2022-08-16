@@ -12,7 +12,7 @@ const path = {
     book_remote: 'book-remote',
     book_local: 'book-local',
     cancel: 'cancel',
-    check_in: 'check-in',
+    check_in: 'apis/check-in',
     done: 'done',
     update: 'update',
     add: 'apis/add',
@@ -29,10 +29,7 @@ const GET = async (path, params = {}) => {
         method: 'get',
         url,
         timeout,
-        params: {
-            ...params,
-            partner
-        }
+        params
     })
     return response
 }
@@ -42,11 +39,11 @@ const POST = async (path, data = {}) => {
     const response = await axios({
         method: 'post',
         url,
-        data: {
-            ...data,
-            partner
-        },
+        data,
         timeout,
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
     return response
 }

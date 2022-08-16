@@ -140,19 +140,22 @@ export default class HomeScreen extends Component {
             const userId = payloadArray[0]
             const partnerId = payloadArray[1]
             const serviceId = payloadArray[3]
-            const ticket = Number(payloadArray[2])
+            const ticket = payloadArray[2]
             const service = find(lanes, lane => lane._id === serviceId)
             const response = await ManagerApi.checkin({ lane: serviceId, userId, ticket, partnerId })
             if (response?.status === 200) {
                 const numberTicket = response?.data?.ticket?.number
-                this.printTicket(numberTicket, service)
+                this.printTicket(Number(numberTicket || 0), service)
                 this.setState({ isFetching: false })
                 return
             }
-            if (response?.message) {
-                showToast(response.message)
+            if (response?.data?.message) {
+                showToast(response.data.message)
             }
         } catch (e) {
+            if (e.response?.data?.message) {
+                showToast(e.response.data.message)
+            }
             console.error("onBarcodeScan Error", e)
         }
     }
@@ -253,6 +256,7 @@ export default class HomeScreen extends Component {
     }
 
     pressLogo = () => {
+        // this.onBarcodeScan("Io1qR6Nbw7cpEYtjFvpCNy7tj2Z2,i6nUo4pFpteCN0r8r9QZ,151,TOTIkjUSdZoaqDfXt3Y9")
         this.clearTimeoutLogoPress()
         this.currentCountPressLogo++
         if (this.currentCountPressLogo >= this.countPressLogo) {
